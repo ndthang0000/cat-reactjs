@@ -20,6 +20,7 @@ import DOMAIN from 'src/domain'
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import axiosInstance from 'src/axios'
 
 const Login = () => {
 
@@ -40,7 +41,6 @@ const Login = () => {
       const data = await axios.post(`${DOMAIN}/auth/login`, body)
       if (data.status == 200) {
         localStorage.setItem('token', data.data.tokens.access.token)
-
         toast.success('Login Successfully', { autoClose: 3000 })
         navigate('/project')
         dispatch({ type: 'login' })

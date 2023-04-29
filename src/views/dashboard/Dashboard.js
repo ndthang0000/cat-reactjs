@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import {
   CAvatar,
@@ -9,6 +9,8 @@ import {
   CCardFooter,
   CCardHeader,
   CCol,
+  CPagination,
+  CPaginationItem,
   CProgress,
   CRow,
   CTable,
@@ -42,6 +44,7 @@ import {
   cilPeople,
   cilUser,
   cilUserFemale,
+  cilFolderOpen
 } from '@coreui/icons'
 
 import avatar1 from 'src/assets/images/avatars/1.jpg'
@@ -60,6 +63,8 @@ import DOMAIN from 'src/domain'
 
 import axios from 'axios'
 
+import axiosInstance from '../../axios'
+
 import { useSelector, useDispatch } from 'react-redux'
 
 const Dashboard = () => {
@@ -67,6 +72,28 @@ const Dashboard = () => {
   const navigate = useNavigate()
 
   const isAuthenticate = useSelector((state) => state.isAuthenticate)
+
+  const [projectData, setProjectData] = useState([])
+  const [filters, setFilters] = useState(
+    {
+      page: 1,
+      totalPages: 1
+    }
+  )
+  const [type, setType] = useState('ALL')
+
+  const getProject = async (type) => {
+    try {
+
+      const data = await axiosInstance.get(`${DOMAIN}/project?page=${filters.page}&type=${type}&limit=6`)
+      if (data.status == 200) {
+        setProjectData(data.data.results)
+        setFilters({ ...filters, page: data.data.page, totalPages: data.data.totalPages })
+      }
+    } catch (error) {
+
+    }
+  }
 
   useEffect(() => {
     const checkToken = async () => {
@@ -81,6 +108,7 @@ const Dashboard = () => {
         const data = await axios.get(`${DOMAIN}/auth/check-token`, config)
       }
       catch (err) {
+        localStorage.removeItem('token')
         return navigate('/login')
       }
     }
@@ -91,14 +119,33 @@ const Dashboard = () => {
   }, [])
 
   useEffect(() => {
-    const getProject = async () => {
-      try {
-        const data = await axios.get(`${DOMAIN}`)
-      } catch (error) {
-
-      }
-    }
+    getProject(type)
   }, [])
+
+  const convertStatusProject = (status) => {
+    if (status == 'INPROGRESS') {
+      return 'warning'
+    }
+    if (status == 'CANCEL') {
+      return 'danger'
+    }
+    if (status == 'FINISH') {
+      return 'success'
+    }
+  }
+
+  const initPaginate = (currentPage) => {
+    let data = []
+    for (let i = currentPage - 1; i < filters.totalPages && i < currentPage + 2; i++) {
+      data.push(currentPage)
+    }
+    return data
+  }
+
+  const handleSelectType = async (e) => {
+    setType(e.target.value)
+    getProject(e.target.value)
+  }
 
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
 
@@ -229,7 +276,24 @@ const Dashboard = () => {
       <CRow>
         <CCol xs>
           <CCard className="mb-4">
-            <CCardHeader>Traffic {' & '} Sales</CCardHeader>
+            <CCardHeader >
+              Projects
+              <div className='mt-2' onClick={handleSelectType}>
+                <CButtonGroup className="float-start me-3">
+                  {['ALL', 'INDIVIDUAL'].map((value) => (
+                    <CButton
+                      color={value === type ? 'outline-success' : "outline-secondary"}
+                      key={value}
+                      className="mx-0"
+                      active={value === type}
+                      value={value}
+                    >
+                      {value}
+                    </CButton>
+                  ))}
+                </CButtonGroup>
+              </div>
+            </CCardHeader>
             <CCardBody>
               {/* <CRow>
                 <CCol xs={12} md={6} xl={6}>
@@ -321,58 +385,76 @@ const Dashboard = () => {
                     <CTableHeaderCell className="text-center">
                       <CIcon icon={cilPeople} />
                     </CTableHeaderCell>
-                    <CTableHeaderCell>Project Name</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Progress</CTableHeaderCell>
-                    <CTableHeaderCell>Source Lang</CTableHeaderCell>
+                    <CTableHeaderCell >Project Name</CTableHeaderCell>
+                    <CTableHeaderCell >Owner</CTableHeaderCell>
+                    <CTableHeaderCell >Progress</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Source Lang</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Target Lang</CTableHeaderCell>
-                    <CTableHeaderCell>Quantity File</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Quantity File</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Action</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {tableExample.map((item, index) => (
+                  {projectData.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">
-                        <CAvatar size="md" src={item.avatar.src} status={item.avatar.status} />
+                        <CAvatar size="lg" src={item.image} status={convertStatusProject(item.status)} />
                       </CTableDataCell>
                       <CTableDataCell>
-                        <div>{item.user.name}</div>
                         <div className="small text-medium-emphasis">
-                          <span>{item.user.new ? 'New' : 'Recurring'}</span> | Registered:{' '}
-                          {item.user.registered}
+                          <strong className='cursor-pointer'>{item.projectName}</strong>
                         </div>
                       </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.country.flag} title={item.country.name} />
+                      <CTableDataCell>
+                        <div className="small text-medium-emphasis">
+                          <strong className='cursor-pointer'>{item.owner.name}</strong>
+                        </div>
                       </CTableDataCell>
                       <CTableDataCell>
                         <div className="clearfix">
                           <div className="float-start">
-                            <strong>{item.usage.value}%</strong>
+                            <strong>{item.percentComplete}%</strong>
                           </div>
                           <div className="float-end">
-                            <small className="text-medium-emphasis">{item.usage.period}</small>
+                            <strong className="text-medium-emphasis">100%</strong>
                           </div>
                         </div>
-                        <CProgress thin color={item.usage.color} value={item.usage.value} />
+                        <CProgress thin color={convertStatusProject(item.status)} value={item.percentComplete} />
+                      </CTableDataCell>
+
+                      <CTableDataCell className="text-center">
+                        {/* <CIcon size="xl" icon={item.flag} title={item.name} /> */}
+                        <div>{item.sourceLanguage}</div>
+                      </CTableDataCell>
+
+                      <CTableDataCell className="text-center">
+                        {/* <CIcon size="xl" icon={item.icon} /> */}
+                        <div>{item.targetLanguage}</div>
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
-                        <CIcon size="xl" icon={item.payment.icon} />
+                        <div>{item.files.length}</div>
                       </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="small text-medium-emphasis">Last login</div>
-                        <strong>{item.activity}</strong>
+                      <CTableDataCell className="text-center">
+                        <CIcon icon={cilFolderOpen} className='cursor-pointer' />
                       </CTableDataCell>
                     </CTableRow>
                   ))}
                 </CTableBody>
               </CTable>
+              <CPagination size="sm" aria-label="Page navigation example" className='float-end mt-4 cursor-pointer'>
+                <CPaginationItem disabled={filters.page == 1 ? true : false}>Previous</CPaginationItem>
+                {initPaginate(filters.page).map((item, index) =>
+                  <CPaginationItem active={item == filters.page} key={index}>{item}</CPaginationItem>
+                )}
+                <CPaginationItem disabled={filters.page == filters.totalPages ? true : false} >Next</CPaginationItem>
+              </CPagination>
             </CCardBody>
           </CCard>
         </CCol>
       </CRow>
 
-      <WidgetsDropdown />
-      <CCard className="mb-4">
+      {/* <WidgetsDropdown /> */}
+      {/* <CCard className="mb-4">
         <CCardBody>
           <CRow>
             <CCol sm={5}>
@@ -497,9 +579,9 @@ const Dashboard = () => {
             ))}
           </CRow>
         </CCardFooter>
-      </CCard>
+      </CCard> */}
 
-      <WidgetsBrand withCharts />
+      {/* <WidgetsBrand withCharts /> */}
 
 
     </>
