@@ -77,18 +77,20 @@ const Dashboard = () => {
   const [filters, setFilters] = useState(
     {
       page: 1,
-      totalPages: 1
+      limit: 6,
+      type: 'ALL'
     }
   )
-  const [type, setType] = useState('ALL')
+  const [totalPages, setTotalPages] = useState(1)
 
-  const getProject = async (type) => {
+
+  const getProject = async () => {
     try {
 
-      const data = await axiosInstance.get(`${DOMAIN}/project?page=${filters.page}&type=${type}&limit=6`)
+      const data = await axiosInstance.get(`${DOMAIN}/project?page=${filters.page}&type=${filters.type}&limit=${filters.limit}`)
       if (data.status == 200) {
         setProjectData(data.data.results)
-        setFilters({ ...filters, page: data.data.page, totalPages: data.data.totalPages })
+        setTotalPages(data.data.totalPages)
       }
     } catch (error) {
 
@@ -119,8 +121,8 @@ const Dashboard = () => {
   }, [])
 
   useEffect(() => {
-    getProject(type)
-  }, [])
+    getProject()
+  }, [filters])
 
   const convertStatusProject = (status) => {
     if (status == 'INPROGRESS') {
@@ -134,17 +136,28 @@ const Dashboard = () => {
     }
   }
 
+  const handleOrderPage = (e) => {
+    const page = Number(e.target.getAttribute('value'))
+    if (page <= 0 || page > totalPages) {
+      return
+    }
+    setFilters({ ...filters, page: Number(e.target.getAttribute('value')) })
+  }
+
   const initPaginate = (currentPage) => {
     let data = []
-    for (let i = currentPage - 1; i < filters.totalPages && i < currentPage + 2; i++) {
-      data.push(currentPage)
+    let i = currentPage - 1
+    if (currentPage == 1) {
+      i = 1
+    }
+    for (; i <= totalPages && i < currentPage + 2; i++) {
+      data.push(i)
     }
     return data
   }
 
   const handleSelectType = async (e) => {
-    setType(e.target.value)
-    getProject(e.target.value)
+    setFilters({ ...filters, type: e.target.value })
   }
 
   const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
@@ -282,10 +295,10 @@ const Dashboard = () => {
                 <CButtonGroup className="float-start me-3">
                   {['ALL', 'INDIVIDUAL'].map((value) => (
                     <CButton
-                      color={value === type ? 'outline-success' : "outline-secondary"}
+                      color={value === filters.type ? 'outline-success' : "outline-secondary"}
                       key={value}
                       className="mx-0"
-                      active={value === type}
+                      active={value === filters.type}
                       value={value}
                     >
                       {value}
@@ -441,12 +454,12 @@ const Dashboard = () => {
                   ))}
                 </CTableBody>
               </CTable>
-              <CPagination size="sm" aria-label="Page navigation example" className='float-end mt-4 cursor-pointer'>
-                <CPaginationItem disabled={filters.page == 1 ? true : false}>Previous</CPaginationItem>
+              <CPagination size="sm" aria-label="Page navigation example" className='float-end mt-4 cursor-pointer' onClick={handleOrderPage}>
+                <CPaginationItem disabled={filters.page == 1 ? true : false} value={filters.page - 1}>Previous</CPaginationItem>
                 {initPaginate(filters.page).map((item, index) =>
-                  <CPaginationItem active={item == filters.page} key={index}>{item}</CPaginationItem>
+                  <CPaginationItem active={item == filters.page} key={index} value={item}>{item}</CPaginationItem>
                 )}
-                <CPaginationItem disabled={filters.page == filters.totalPages ? true : false} >Next</CPaginationItem>
+                <CPaginationItem disabled={filters.page == totalPages ? true : false} value={filters.page + 1}>Next</CPaginationItem>
               </CPagination>
             </CCardBody>
           </CCard>
