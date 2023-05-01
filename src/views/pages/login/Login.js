@@ -43,7 +43,7 @@ const Login = () => {
         localStorage.setItem('token', data.data.tokens.access.token)
         toast.success('Login Successfully', { autoClose: 3000 })
         navigate('/project')
-        dispatch({ type: 'login' })
+        dispatch({ type: 'login', userInformation: data.data.user })
       }
     }
     catch (err) {

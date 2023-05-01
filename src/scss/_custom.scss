@@ -2,3 +2,13 @@
 .cursor-pointer{
   cursor: pointer;
 }
+
+.project-name{
+  :hover{
+    color: red;
+  }
+}
+
+.breadcrumb-custom{
+  font-weight: 600;
+}

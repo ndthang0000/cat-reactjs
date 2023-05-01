@@ -2,7 +2,8 @@ import { createStore } from 'redux'
 
 const initialState = {
   sidebarShow: true,
-  isAuthenticate: false
+  isAuthenticate: false,
+  userInformation: {}
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {
@@ -10,7 +11,7 @@ const changeState = (state = initialState, { type, ...rest }) => {
     case 'set':
       return { ...state, ...rest }
     case 'login':
-      return { ...state, isAuthenticate: true }
+      return { ...state, isAuthenticate: true, userInformation: rest.userInformation }
     default:
       return state
   }

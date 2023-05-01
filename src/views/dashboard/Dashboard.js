@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import queryString from 'query-string';
 
 import {
   CAvatar,
@@ -47,6 +48,7 @@ import {
   cilFolderOpen
 } from '@coreui/icons'
 
+
 import avatar1 from 'src/assets/images/avatars/1.jpg'
 import avatar2 from 'src/assets/images/avatars/2.jpg'
 import avatar3 from 'src/assets/images/avatars/3.jpg'
@@ -57,7 +59,7 @@ import avatar6 from 'src/assets/images/avatars/6.jpg'
 import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import DOMAIN from 'src/domain'
 
@@ -66,28 +68,38 @@ import axios from 'axios'
 import axiosInstance from '../../axios'
 
 import { useSelector, useDispatch } from 'react-redux'
+import moment from 'moment/moment'
+
+import Paper from '@mui/material/Paper';
+import InputBase from '@mui/material/InputBase';
+import Divider from '@mui/material/Divider';
+import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 const Dashboard = () => {
 
   const navigate = useNavigate()
-
   const isAuthenticate = useSelector((state) => state.isAuthenticate)
-
+  const dispatch = useDispatch()
   const [projectData, setProjectData] = useState([])
   const [filters, setFilters] = useState(
     {
       page: 1,
       limit: 6,
-      type: 'ALL'
+      type: 'ALL',
+      search: ''
     }
   )
   const [totalPages, setTotalPages] = useState(1)
+  const [search, setSearch] = useState('')
 
 
   const getProject = async () => {
     try {
 
-      const data = await axiosInstance.get(`${DOMAIN}/project?page=${filters.page}&type=${filters.type}&limit=${filters.limit}`)
+      const data = await axiosInstance.get(`${DOMAIN}/project?${queryString.stringify(filters)}`)
       if (data.status == 200) {
         setProjectData(data.data.results)
         setTotalPages(data.data.totalPages)
@@ -108,6 +120,7 @@ const Dashboard = () => {
           headers: { Authorization: `Bearer ${getLocalToken}` },
         };
         const data = await axios.get(`${DOMAIN}/auth/check-token`, config)
+        dispatch({ type: 'login', userInformation: data.data.user })
       }
       catch (err) {
         localStorage.removeItem('token')
@@ -160,129 +173,6 @@ const Dashboard = () => {
     setFilters({ ...filters, type: e.target.value })
   }
 
-  const random = (min, max) => Math.floor(Math.random() * (max - min + 1) + min)
-
-  const progressExample = [
-    { title: 'Visits', value: '29.703 Users', percent: 40, color: 'success' },
-    { title: 'Unique', value: '24.093 Users', percent: 20, color: 'info' },
-    { title: 'Pageviews', value: '78.706 Views', percent: 60, color: 'warning' },
-    { title: 'New Users', value: '22.123 Users', percent: 80, color: 'danger' },
-    { title: 'Bounce Rate', value: 'Average Rate', percent: 40.15, color: 'primary' },
-  ]
-
-  const progressGroupExample1 = [
-    { title: 'Monday', value1: 34, value2: 78 },
-    { title: 'Tuesday', value1: 56, value2: 94 },
-    { title: 'Wednesday', value1: 12, value2: 67 },
-    { title: 'Thursday', value1: 43, value2: 91 },
-    { title: 'Friday', value1: 22, value2: 73 },
-    { title: 'Saturday', value1: 53, value2: 82 },
-    { title: 'Sunday', value1: 9, value2: 69 },
-  ]
-
-  const progressGroupExample2 = [
-    { title: 'Male', icon: cilUser, value: 53 },
-    { title: 'Female', icon: cilUserFemale, value: 43 },
-  ]
-
-  const progressGroupExample3 = [
-    { title: 'Organic Search', icon: cibGoogle, percent: 56, value: '191,235' },
-    { title: 'Facebook', icon: cibFacebook, percent: 15, value: '51,223' },
-    { title: 'Twitter', icon: cibTwitter, percent: 11, value: '37,564' },
-    { title: 'LinkedIn', icon: cibLinkedin, percent: 8, value: '27,319' },
-  ]
-
-  const tableExample = [
-    {
-      avatar: { src: avatar1, status: 'success' },
-      user: {
-        name: 'Yiorgos Avraamu',
-        new: true,
-        registered: 'Jan 1, 2021',
-      },
-      country: { name: 'USA', flag: cifUs },
-      usage: {
-        value: 50,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      payment: { name: 'Mastercard', icon: cibCcMastercard },
-      activity: '10 sec ago',
-    },
-    {
-      avatar: { src: avatar2, status: 'danger' },
-      user: {
-        name: 'Avram Tarasios',
-        new: false,
-        registered: 'Jan 1, 2021',
-      },
-      country: { name: 'Brazil', flag: cifBr },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'info',
-      },
-      payment: { name: 'Visa', icon: cibCcVisa },
-      activity: '5 minutes ago',
-    },
-    {
-      avatar: { src: avatar3, status: 'warning' },
-      user: { name: 'Quintin Ed', new: true, registered: 'Jan 1, 2021' },
-      country: { name: 'India', flag: cifIn },
-      usage: {
-        value: 74,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'warning',
-      },
-      payment: { name: 'Stripe', icon: cibCcStripe },
-      activity: '1 hour ago',
-    },
-    {
-      avatar: { src: avatar4, status: 'secondary' },
-      user: { name: 'Enéas Kwadwo', new: true, registered: 'Jan 1, 2021' },
-      country: { name: 'France', flag: cifFr },
-      usage: {
-        value: 98,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'danger',
-      },
-      payment: { name: 'PayPal', icon: cibCcPaypal },
-      activity: 'Last month',
-    },
-    {
-      avatar: { src: avatar5, status: 'success' },
-      user: {
-        name: 'Agapetus Tadeáš',
-        new: true,
-        registered: 'Jan 1, 2021',
-      },
-      country: { name: 'Spain', flag: cifEs },
-      usage: {
-        value: 22,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'primary',
-      },
-      payment: { name: 'Google Wallet', icon: cibCcApplePay },
-      activity: 'Last week',
-    },
-    {
-      avatar: { src: avatar6, status: 'danger' },
-      user: {
-        name: 'Friderik Dávid',
-        new: true,
-        registered: 'Jan 1, 2021',
-      },
-      country: { name: 'Poland', flag: cifPl },
-      usage: {
-        value: 43,
-        period: 'Jun 11, 2021 - Jul 10, 2021',
-        color: 'success',
-      },
-      payment: { name: 'Amex', icon: cibCcAmex },
-      activity: 'Last week',
-    },
-  ]
-
   return (
     <>
 
@@ -291,8 +181,8 @@ const Dashboard = () => {
           <CCard className="mb-4">
             <CCardHeader >
               Projects
-              <div className='mt-2' onClick={handleSelectType}>
-                <CButtonGroup className="float-start me-3">
+              <div className='mt-2' style={{ justifyContent: 'space-between', display: 'flex' }}>
+                <CButtonGroup className="float-start me-3" onClick={handleSelectType}>
                   {['ALL', 'INDIVIDUAL'].map((value) => (
                     <CButton
                       color={value === filters.type ? 'outline-success' : "outline-secondary"}
@@ -305,6 +195,41 @@ const Dashboard = () => {
                     </CButton>
                   ))}
                 </CButtonGroup>
+                <div style={{ display: 'flex' }}>
+                  <Paper
+                    component="form"
+                    elevation={2}
+                    sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 250, marginRight: 1 }}
+                  >
+                    <InputBase
+                      sx={{ ml: 1, flex: 1 }}
+                      placeholder="Find Project"
+                      inputProps={{ 'aria-label': 'search project' }}
+                      name='search'
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                      <SearchIcon onClick={(e) => setFilters({ ...filters, search: search })} />
+                    </IconButton>
+                    <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+
+                  </Paper>
+                  <FormControl fullWidth={false}>
+                    <InputLabel id="demo-simple-select-label">Sort</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-label"
+                      id="demo-simple-select"
+                      value={10}
+                      label="Sort"
+                    >
+                      <MenuItem value={10}>Last update</MenuItem>
+                      <MenuItem value={20}>Files</MenuItem>
+                      <MenuItem value={30}>Name</MenuItem>
+                    </Select>
+                  </FormControl>
+                </div>
+
               </div>
             </CCardHeader>
             <CCardBody>
@@ -401,9 +326,10 @@ const Dashboard = () => {
                     <CTableHeaderCell >Project Name</CTableHeaderCell>
                     <CTableHeaderCell >Owner</CTableHeaderCell>
                     <CTableHeaderCell >Progress</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Source Lang</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Target Lang</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Quantity File</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Source</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Target</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Files</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Last update</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Action</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
@@ -415,7 +341,9 @@ const Dashboard = () => {
                       </CTableDataCell>
                       <CTableDataCell>
                         <div className="small text-medium-emphasis">
-                          <strong className='cursor-pointer'>{item.projectName}</strong>
+                          <Link to={`/project/detail/${item.slug}`}>
+                            <strong className='cursor-pointer project-name'>{item.projectName}</strong>
+                          </Link>
                         </div>
                       </CTableDataCell>
                       <CTableDataCell>
@@ -446,6 +374,9 @@ const Dashboard = () => {
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
                         <div>{item.files.length}</div>
+                      </CTableDataCell>
+                      <CTableDataCell className="text-center">
+                        <div>{moment(item.updatedAt).fromNow()}</div>
                       </CTableDataCell>
                       <CTableDataCell className="text-center">
                         <CIcon icon={cilFolderOpen} className='cursor-pointer' />
