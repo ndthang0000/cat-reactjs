@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Avatar, Stack } from '@mui/material';
 import Button from '@mui/material/Button';
 import React, { useEffect, useState } from 'react'
 import FileUpload from 'react-mui-fileuploader';
@@ -8,22 +8,45 @@ import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import moment from 'moment/moment';
+import axiosInstance from '../../axios'
+import { toast } from 'react-toastify';
 
 
-const Overview = () => {
+const Overview = ({ project, setFetchNew }) => {
 
   const [filesToUpload, setFilesToUpload] = useState([])
 
   const handleFilesChange = (files) => {
-    // Update chosen files
     setFilesToUpload([...files])
   };
 
   const handleFileUploadError = (files) => {
   };
 
-  const uploadFiles = () => {
+  const handleRemoveFile = (context) => {
+    console.log(context)
+  }
 
+  const handleUploadFileToServer = async () => {
+    const formData = new FormData();
+
+    filesToUpload.forEach(file => {
+      formData.append(`files`, file);
+    });
+
+    //formData.append('files', filesToUpload)
+    formData.append('projectId', project.projects.id)
+    const data = await axiosInstance.post('/project/upload-file',
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        }
+      }
+    )
+    toast.success(data.data.message, { autoClose: 3000 })
+    setFetchNew(state => !state)
   }
 
   const [expanded, setExpanded] = React.useState(false);
@@ -37,78 +60,34 @@ const Overview = () => {
     <>
       <Paper elevation={6} sx={{ padding: 3 }} >
         <div>
-          <Accordion expanded={expanded === 'panel1'} onChange={handleAccordionChange('panel1')}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1bh-content"
-              id="panel1bh-header"
-            >
-              <Typography sx={{ width: '33%', flexShrink: 0 }}>
-                General settings
-              </Typography>
-              <Typography sx={{ color: 'text.secondary' }}>I am an accordion</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography>
-                Nulla facilisi. Phasellus sollicitudin nulla et quam mattis feugiat.
-                Aliquam eget maximus est, id dignissim quam.
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion expanded={expanded === 'panel2'} onChange={handleAccordionChange('panel2')}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel2bh-content"
-              id="panel2bh-header"
-            >
-              <Typography sx={{ width: '33%', flexShrink: 0 }}>Users</Typography>
-              <Typography sx={{ color: 'text.secondary' }}>
-                You are currently not an owner
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography>
-                Donec placerat, lectus sed mattis semper, neque lectus feugiat lectus,
-                varius pulvinar diam eros in elit. Pellentesque convallis laoreet
-                laoreet.
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion expanded={expanded === 'panel3'} onChange={handleAccordionChange('panel3')}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel3bh-content"
-              id="panel3bh-header"
-            >
-              <Typography sx={{ width: '33%', flexShrink: 0 }}>
-                Advanced settings
-              </Typography>
-              <Typography sx={{ color: 'text.secondary' }}>
-                Filtering has been entirely disabled for whole web server
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography>
-                Nunc vitae orci ultricies, auctor nunc in, volutpat nisl. Integer sit
-                amet egestas eros, vitae egestas augue. Duis vel est augue.
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
-          <Accordion expanded={expanded === 'panel4'} onChange={handleAccordionChange('panel4')}>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel4bh-content"
-              id="panel4bh-header"
-            >
-              <Typography sx={{ width: '33%', flexShrink: 0 }}>Personal data</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Typography>
-                Nunc vitae orci ultricies, auctor nunc in, volutpat nisl. Integer sit
-                amet egestas eros, vitae egestas augue. Duis vel est augue.
-              </Typography>
-            </AccordionDetails>
-          </Accordion>
+          {project.projects && project.projects.files.map((item, index) =>
+            <Accordion key={index} expanded={expanded === `panel${index + 1}`} onChange={handleAccordionChange(`panel${index + 1}`)}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1bh-content"
+                id="panel1bh-header"
+              >
+                <Avatar variant="rounded" src={item.icon} sx={{ marginRight: 3 }}>
+                </Avatar>
+                <Typography sx={{ width: '33%', flexShrink: 0 }} variant='h6'>
+                  {item.nameFile}
+                </Typography>
+                <Typography sx={{ color: 'text.secondary', width: '33%' }} variant='subtitle2' >Last updated: {moment(item.updatedAt).fromNow()}</Typography>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginRight: 10 }}>
+                  <Avatar variant="rounded" src='https://images-storage-bucket.s3.ap-southeast-1.amazonaws.com/upload/avatar/icon/translation.png' sx={{ marginRight: 3 }} />
+
+                </div>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography>
+                  Quantity Sentence: {item.quantitySentence}
+                </Typography>
+                <Typography>
+                  Created At: {moment(item.createdAt).format('LLL')}
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          )}
         </div>
         <FileUpload
           getBase64={false}
@@ -130,9 +109,7 @@ const Overview = () => {
           showPlaceholderImage={true}
           PlaceholderGridProps={{ md: 4 }}
           LabelsGridProps={{ md: 8 }}
-          onContextReady={context => {
-            // access to component context here
-          }}
+          onContextReady={handleRemoveFile}
           ContainerProps={{
             elevation: 0,
             variant: "outlined",
@@ -140,7 +117,7 @@ const Overview = () => {
           }}
         />
         <Stack direction="row" alignItems="center" spacing={2} justifyContent='center'>
-          <Button variant="contained" component="label">
+          <Button variant="contained" component="label" onClick={handleUploadFileToServer}>
             Upload
           </Button>
         </Stack>

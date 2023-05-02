@@ -54,7 +54,8 @@ const DetailProject = () => {
   const lastParam = params[params.length - 1]
   const navigate = useNavigate()
   const dispatch = useDispatch()
-
+  const [project, setProject] = useState({})
+  const [fetchNew, setFetchNew] = useState(false)
   const isAuthenticate = useSelector((state) => state.isAuthenticate)
 
 
@@ -93,8 +94,14 @@ const DetailProject = () => {
   }, [])
 
   useEffect(() => {
-    //getProject()
-  }, [])
+    const getDetailProject = async () => {
+      const data = await axiosInstance.get(`${DOMAIN}/project/detail/${lastParam}`)
+      if (data.data.status) {
+        setProject(data.data.data)
+      }
+    }
+    getDetailProject()
+  }, [fetchNew])
 
 
   return (
@@ -109,9 +116,7 @@ const DetailProject = () => {
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <Overview>
-
-          </Overview>
+          <Overview project={project} setFetchNew={setFetchNew} />
         </TabPanel>
         <TabPanel value={value} index={1}>
           Member
