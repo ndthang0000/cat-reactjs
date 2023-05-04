@@ -82,6 +82,7 @@ const Dashboard = () => {
 
   const navigate = useNavigate()
   const isAuthenticate = useSelector((state) => state.isAuthenticate)
+  const isShowBackdrop = useSelector((state) => state.isShowBackdrop)
   const dispatch = useDispatch()
   const [projectData, setProjectData] = useState([])
   const [filters, setFilters] = useState(
@@ -98,8 +99,9 @@ const Dashboard = () => {
 
   const getProject = async () => {
     try {
-
+      dispatch({ type: 'set-backdrop' })
       const data = await axiosInstance.get(`${DOMAIN}/project?${queryString.stringify(filters)}`)
+      dispatch({ type: 'set-backdrop' })
       if (data.status == 200) {
         setProjectData(data.data.results)
         setTotalPages(data.data.totalPages)

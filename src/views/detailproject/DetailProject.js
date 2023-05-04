@@ -20,6 +20,7 @@ import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Overview from './OverviewProject';
+import Translating from './Translating';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -112,11 +113,11 @@ const DetailProject = () => {
             <Tab label="Overview" {...a11yProps(0)} />
             <Tab label="Activity" {...a11yProps(1)} />
             <Tab label="Member" {...a11yProps(2)} />
-            <Tab label="Item Three" {...a11yProps(3)} />
+            <Tab label="Translating" {...a11yProps(3)} />
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <Overview project={project} setFetchNew={setFetchNew} />
+          <Overview project={project} setFetchNew={setFetchNew} handleChangeTab={handleChangeTab} />
         </TabPanel>
         <TabPanel value={value} index={1}>
           Member
@@ -125,7 +126,7 @@ const DetailProject = () => {
           Item Three
         </TabPanel>
         <TabPanel value={value} index={3}>
-          Item Three
+          <Translating project={project} setFetchNew={setFetchNew} />
         </TabPanel>
       </Box>
 

@@ -13,7 +13,7 @@ import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
 
 
-const Overview = ({ project, setFetchNew, handleChangeTab }) => {
+const Translating = ({ project, setFetchNew }) => {
 
   const [filesToUpload, setFilesToUpload] = useState([])
 
@@ -73,13 +73,8 @@ const Overview = ({ project, setFetchNew, handleChangeTab }) => {
                   {item.nameFile}
                 </Typography>
                 <Typography sx={{ color: 'text.secondary', width: '33%' }} variant='subtitle2' >Last updated: {moment(item.updatedAt).fromNow()}</Typography>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginRight: 10 }} onClick={(e) => handleChangeTab(e, 3)}>
-                  <Avatar
-
-                    variant="rounded"
-                    src='https://images-storage-bucket.s3.ap-southeast-1.amazonaws.com/upload/avatar/icon/translation.png'
-                    sx={{ marginRight: 3 }}
-                  />
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginRight: 10 }}>
+                  <Avatar variant="rounded" src='https://images-storage-bucket.s3.ap-southeast-1.amazonaws.com/upload/avatar/icon/translation.png' sx={{ marginRight: 3 }} />
 
                 </div>
               </AccordionSummary>
@@ -133,4 +128,4 @@ const Overview = ({ project, setFetchNew, handleChangeTab }) => {
   )
 }
 
-export default Overview
+export default Translating

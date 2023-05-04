@@ -3,7 +3,8 @@ import { createStore } from 'redux'
 const initialState = {
   sidebarShow: true,
   isAuthenticate: false,
-  userInformation: {}
+  userInformation: {},
+  isShowBackdrop: false
 }
 
 const changeState = (state = initialState, { type, ...rest }) => {
@@ -12,6 +13,8 @@ const changeState = (state = initialState, { type, ...rest }) => {
       return { ...state, ...rest }
     case 'login':
       return { ...state, isAuthenticate: true, userInformation: rest.userInformation }
+    case 'set-backdrop':
+      return { ...state, isShowBackdrop: !state.isShowBackdrop }
     default:
       return state
   }
