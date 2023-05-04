@@ -25,7 +25,6 @@ const Overview = ({ project, setFetchNew, handleChangeTab }) => {
   };
 
   const handleRemoveFile = (context) => {
-    console.log(context)
   }
 
   const handleUploadFileToServer = async () => {

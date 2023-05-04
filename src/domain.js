@@ -1,2 +1,2 @@
-const DOMAIN = 'http://catstudy.click/v1'
+const DOMAIN = 'https://catstudy.click/v1'
 export default DOMAIN
