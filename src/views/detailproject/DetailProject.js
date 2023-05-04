@@ -80,7 +80,7 @@ const DetailProject = () => {
         const config = {
           headers: { Authorization: `Bearer ${getLocalToken}` },
         };
-        const data = await axios.get(`${DOMAIN}/auth/check-token`, config)
+        const data = await axios.get(`/auth/check-token`, config)
         dispatch({ type: 'login', userInformation: data.data.user })
       }
       catch (err) {
@@ -96,7 +96,7 @@ const DetailProject = () => {
 
   useEffect(() => {
     const getDetailProject = async () => {
-      const data = await axiosInstance.get(`${DOMAIN}/project/detail/${lastParam}`)
+      const data = await axiosInstance.get(`/project/detail/${lastParam}`)
       if (data.data.status) {
         setProject(data.data.data)
       }

@@ -100,14 +100,14 @@ const Dashboard = () => {
   const getProject = async () => {
     try {
       dispatch({ type: 'set-backdrop' })
-      const data = await axiosInstance.get(`${DOMAIN}/project?${queryString.stringify(filters)}`)
+      const data = await axiosInstance.get(`/project?${queryString.stringify(filters)}`)
       dispatch({ type: 'set-backdrop' })
       if (data.status == 200) {
         setProjectData(data.data.results)
         setTotalPages(data.data.totalPages)
       }
     } catch (error) {
-
+      dispatch({ type: 'set-backdrop' })
     }
   }
 
@@ -121,7 +121,7 @@ const Dashboard = () => {
         const config = {
           headers: { Authorization: `Bearer ${getLocalToken}` },
         };
-        const data = await axios.get(`${DOMAIN}/auth/check-token`, config)
+        const data = await axiosInstance.get(`/auth/check-token`, config)
         dispatch({ type: 'login', userInformation: data.data.user })
       }
       catch (err) {

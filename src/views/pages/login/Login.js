@@ -38,7 +38,7 @@ const Login = () => {
       password
     }
     try {
-      const data = await axios.post(`${DOMAIN}/auth/login`, body)
+      const data = await axiosInstance.post(`/auth/login`, body)
       if (data.status == 200) {
         localStorage.setItem('token', data.data.tokens.access.token)
         toast.success('Login Successfully', { autoClose: 3000 })

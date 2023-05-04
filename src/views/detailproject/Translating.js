@@ -25,7 +25,6 @@ const Translating = ({ project, setFetchNew }) => {
   };
 
   const handleRemoveFile = (context) => {
-    console.log(context)
   }
 
   const handleUploadFileToServer = async () => {
