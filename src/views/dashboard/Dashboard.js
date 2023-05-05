@@ -76,28 +76,41 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 const Dashboard = () => {
 
   const navigate = useNavigate()
   const isAuthenticate = useSelector((state) => state.isAuthenticate)
-  const isShowBackdrop = useSelector((state) => state.isShowBackdrop)
+
   const dispatch = useDispatch()
   const [projectData, setProjectData] = useState([])
   const [filters, setFilters] = useState(
     {
       page: 1,
       limit: 6,
-      type: 'ALL',
-      search: ''
+      type: 'All',
+      search: '',
+      sortBy: ''
     }
   )
   const [totalPages, setTotalPages] = useState(1)
   const [search, setSearch] = useState('')
+  const [sortConfig, setSortConfig] = useState(null)
 
+  const fetchSort = async () => {
+    try {
+      const data = await axiosInstance.get(`/project/sort`)
+      if (data.status == 200) {
+        setSortConfig(data.data.data)
+        setFilters({ ...filters, sortBy: Object.values(data.data.data)[0] })
+      }
+    } catch (error) {
 
-  const getProject = async () => {
+    }
+  }
+
+  const fetchProject = async () => {
     try {
       dispatch({ type: 'set-backdrop' })
       const data = await axiosInstance.get(`/project?${queryString.stringify(filters)}`)
@@ -136,8 +149,12 @@ const Dashboard = () => {
   }, [])
 
   useEffect(() => {
-    getProject()
+    fetchProject()
   }, [filters])
+
+  useEffect(() => {
+    fetchSort()
+  }, [])
 
   const convertStatusProject = (status) => {
     if (status == 'INPROGRESS') {
@@ -175,6 +192,10 @@ const Dashboard = () => {
     setFilters({ ...filters, type: e.target.value })
   }
 
+  const handleChangeSortBy = async (e) => {
+    setFilters({ ...filters, sortBy: e.target.value })
+  }
+
   return (
     <>
 
@@ -184,19 +205,18 @@ const Dashboard = () => {
             <CCardHeader >
               Projects
               <div className='mt-2' style={{ justifyContent: 'space-between', display: 'flex' }}>
-                <CButtonGroup className="float-start me-3" onClick={handleSelectType}>
-                  {['ALL', 'INDIVIDUAL'].map((value) => (
-                    <CButton
-                      color={value === filters.type ? 'outline-success' : "outline-secondary"}
-                      key={value}
-                      className="mx-0"
-                      active={value === filters.type}
-                      value={value}
-                    >
-                      {value}
-                    </CButton>
-                  ))}
-                </CButtonGroup>
+
+                <ButtonGroup
+                  disableElevation
+                  variant="contained"
+                  onClick={handleSelectType}
+                  sx={{ height: '50%', marginTop: 'auto' }}
+                >
+                  {['All', 'Individual'].map((value, index) =>
+                    <Button key={index} value={value} sx={{ backgroundColor: filters.type == value ? '#2549e8' : '#939499' }}>{value}</Button>
+                  )}
+
+                </ButtonGroup>
                 <div style={{ display: 'flex' }}>
                   <Paper
                     component="form"
@@ -222,12 +242,11 @@ const Dashboard = () => {
                     <Select
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
-                      value={10}
+                      value={filters.sortBy}
                       label="Sort"
+                      onChange={handleChangeSortBy}
                     >
-                      <MenuItem value={10}>Last update</MenuItem>
-                      <MenuItem value={20}>Files</MenuItem>
-                      <MenuItem value={30}>Name</MenuItem>
+                      {sortConfig && Object.keys(sortConfig).map(item => <MenuItem value={sortConfig[item]}>{item}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </div>
@@ -335,7 +354,12 @@ const Dashboard = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {projectData.map((item, index) => (
+                  {
+                    projectData.length == 0
+                      ?
+                      'Nothing'
+                      :
+                      projectData.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">
                         <CAvatar size="lg" src={item.image} status={convertStatusProject(item.status)} />
