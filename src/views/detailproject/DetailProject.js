@@ -58,7 +58,7 @@ const DetailProject = () => {
   const [project, setProject] = useState({})
   const [fetchNew, setFetchNew] = useState(false)
   const isAuthenticate = useSelector((state) => state.isAuthenticate)
-
+  const [fileIsTranslating, setFileIsTranslating] = useState('')
 
 
   const [value, setValue] = React.useState(0);
@@ -80,7 +80,7 @@ const DetailProject = () => {
         const config = {
           headers: { Authorization: `Bearer ${getLocalToken}` },
         };
-        const data = await axios.get(`/auth/check-token`, config)
+        const data = await axiosInstance.get(`/auth/check-token`, config)
         dispatch({ type: 'login', userInformation: data.data.user })
       }
       catch (err) {
@@ -99,6 +99,7 @@ const DetailProject = () => {
       const data = await axiosInstance.get(`/project/detail/${lastParam}`)
       if (data.data.status) {
         setProject(data.data.data)
+        //setFileIsTranslating(data.data.data.slug)
       }
     }
     getDetailProject()
@@ -117,7 +118,7 @@ const DetailProject = () => {
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <Overview project={project} setFetchNew={setFetchNew} handleChangeTab={handleChangeTab} />
+          <Overview project={project} setFetchNew={setFetchNew} handleChangeTab={handleChangeTab} setFileIsTranslating={setFileIsTranslating} />
         </TabPanel>
         <TabPanel value={value} index={1}>
           Member
@@ -126,7 +127,7 @@ const DetailProject = () => {
           Item Three
         </TabPanel>
         <TabPanel value={value} index={3}>
-          <Translating project={project} setFetchNew={setFetchNew} />
+          <Translating project={project} setFetchNew={setFetchNew} fileIsTranslating={fileIsTranslating} setFileIsTranslating={setFileIsTranslating} />
         </TabPanel>
       </Box>
 

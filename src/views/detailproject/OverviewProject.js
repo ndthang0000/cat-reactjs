@@ -1,4 +1,4 @@
-import { Avatar, Stack } from '@mui/material';
+import { Alert, Avatar, Stack } from '@mui/material';
 import Button from '@mui/material/Button';
 import React, { useEffect, useState } from 'react'
 import FileUpload from 'react-mui-fileuploader';
@@ -11,11 +11,14 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import moment from 'moment/moment';
 import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
 
 
-const Overview = ({ project, setFetchNew, handleChangeTab }) => {
+const Overview = ({ project, setFetchNew, handleChangeTab, setFileIsTranslating }) => {
 
   const [filesToUpload, setFilesToUpload] = useState([])
+  const isShowBackdrop = useSelector(state => state.isShowBackdrop)
+  const dispatch = useDispatch()
 
   const handleFilesChange = (files) => {
     setFilesToUpload([...files])
@@ -28,24 +31,36 @@ const Overview = ({ project, setFetchNew, handleChangeTab }) => {
   }
 
   const handleUploadFileToServer = async () => {
-    const formData = new FormData();
+    try {
+      dispatch({ type: 'set-backdrop' })
+      const formData = new FormData();
 
-    filesToUpload.forEach(file => {
-      formData.append(`files`, file);
-    });
+      filesToUpload.forEach(file => {
+        formData.append(`files`, file);
+      });
 
-    //formData.append('files', filesToUpload)
-    formData.append('projectId', project.projects.id)
-    const data = await axiosInstance.post('/project/upload-file',
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      //formData.append('files', filesToUpload)
+      formData.append('projectId', project.projects.id)
+      const data = await axiosInstance.post('/project/upload-file',
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          }
         }
+      )
+      if (data.data.status) {
+        toast.success(data.data.message, { autoClose: 3000 })
       }
-    )
-    toast.success(data.data.message, { autoClose: 3000 })
-    setFetchNew(state => !state)
+      else {
+        toast.error(data.data.message, { autoClose: 3000 })
+      }
+      setFetchNew(state => !state)
+      dispatch({ type: 'set-backdrop' })
+    } catch (error) {
+      dispatch({ type: 'set-backdrop' })
+    }
+
   }
 
   const [expanded, setExpanded] = React.useState(false);
@@ -58,6 +73,7 @@ const Overview = ({ project, setFetchNew, handleChangeTab }) => {
   return (
     <>
       <Paper elevation={6} sx={{ padding: 3 }} >
+        <Alert severity="info">We only support DOCX file !!! </Alert>
         <div>
           {project.projects && project.projects.files.map((item, index) =>
             <Accordion key={index} expanded={expanded === `panel${index + 1}`} onChange={handleAccordionChange(`panel${index + 1}`)}>
@@ -72,7 +88,7 @@ const Overview = ({ project, setFetchNew, handleChangeTab }) => {
                   {item.nameFile}
                 </Typography>
                 <Typography sx={{ color: 'text.secondary', width: '33%' }} variant='subtitle2' >Last updated: {moment(item.updatedAt).fromNow()}</Typography>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginRight: 10 }} onClick={(e) => handleChangeTab(e, 3)}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginRight: 10 }} onClick={(e) => { handleChangeTab(e, 3); setFileIsTranslating(item.id) }}>
                   <Avatar
 
                     variant="rounded"

@@ -45,9 +45,11 @@ import {
   cilPeople,
   cilUser,
   cilUserFemale,
-  cilFolderOpen
+  cilFolderOpen,
+  cilArrowRight
 } from '@coreui/icons'
 
+import { pink } from '@mui/material/colors';
 
 import avatar1 from 'src/assets/images/avatars/1.jpg'
 import avatar2 from 'src/assets/images/avatars/2.jpg'
@@ -61,9 +63,7 @@ import WidgetsDropdown from '../widgets/WidgetsDropdown'
 
 import { Link, useNavigate } from 'react-router-dom'
 
-import DOMAIN from 'src/domain'
-
-import axios from 'axios'
+import EastIcon from '@mui/icons-material/East';
 
 import axiosInstance from '../../axios'
 
@@ -328,8 +328,7 @@ const Dashboard = () => {
                     <CTableHeaderCell >Project Name</CTableHeaderCell>
                     <CTableHeaderCell >Owner</CTableHeaderCell>
                     <CTableHeaderCell >Progress</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Source</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Target</CTableHeaderCell>
+                    <CTableHeaderCell className="text-center">Language</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Files</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Last update</CTableHeaderCell>
                     <CTableHeaderCell className="text-center">Action</CTableHeaderCell>
@@ -365,15 +364,15 @@ const Dashboard = () => {
                         <CProgress thin color={convertStatusProject(item.status)} value={item.percentComplete} />
                       </CTableDataCell>
 
-                      <CTableDataCell className="text-center">
+                      <CTableDataCell className="text-center" style={{ fontSize: 14, fontStyle: 'italic' }}>
                         {/* <CIcon size="xl" icon={item.flag} title={item.name} /> */}
-                        <div>{item.sourceLanguage}</div>
+                        <div>
+                          {item.sourceLanguage}
+                          <CIcon icon={cilArrowRight} />
+                          {item.targetLanguage}
+                        </div>
                       </CTableDataCell>
 
-                      <CTableDataCell className="text-center">
-                        {/* <CIcon size="xl" icon={item.icon} /> */}
-                        <div>{item.targetLanguage}</div>
-                      </CTableDataCell>
                       <CTableDataCell className="text-center">
                         <div>{item.files.length}</div>
                       </CTableDataCell>
