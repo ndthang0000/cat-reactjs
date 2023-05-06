@@ -48,13 +48,13 @@ const Login = () => {
     }
     catch (err) {
       console.log('err', err)
-      toast.error(err.response.data.message)
+      //toast.error(err.response.data.message)
     }
   }
 
   useEffect(() => {
     if (isAuthenticate) {
-      navigate('/dashboard')
+      navigate('/project')
     }
   }, [])
 

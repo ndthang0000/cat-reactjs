@@ -4,6 +4,7 @@ import { CContainer, CSpinner } from '@coreui/react'
 
 // routes config
 import routes from '../routes'
+import RequireAuth from './RequireAuth'
 
 const AppContent = () => {
   return (
@@ -13,13 +14,23 @@ const AppContent = () => {
           {routes.map((route, idx) => {
             return (
               route.element && (
+                !route.requireAuth ?
                 <Route
                   key={idx}
                   path={route.path}
                   exact={route.exact}
                   name={route.name}
                   element={<route.element />}
-                />
+                  /> :
+
+                  <Route
+                    key={idx}
+                    path={route.path}
+                    exact={route.exact}
+                    name={route.name}
+                    element={(<RequireAuth><route.element /></RequireAuth>)}
+                  />
+
               )
             )
           })}

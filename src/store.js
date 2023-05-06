@@ -13,6 +13,8 @@ const changeState = (state = initialState, { type, ...rest }) => {
       return { ...state, ...rest }
     case 'login':
       return { ...state, isAuthenticate: true, userInformation: rest.userInformation }
+    case 'logout':
+      return { ...state, isAuthenticate: false, userInformation: {} }
     case 'set-backdrop':
       return { ...state, isShowBackdrop: !state.isShowBackdrop }
     default:

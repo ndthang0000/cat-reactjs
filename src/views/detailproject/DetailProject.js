@@ -6,9 +6,7 @@ import queryString from 'query-string';
 
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import DOMAIN from 'src/domain'
 
-import axios from 'axios'
 
 import axiosInstance from '../../axios'
 
@@ -53,11 +51,8 @@ const DetailProject = () => {
 
   const params = useLocation().pathname.split('/')
   const lastParam = params[params.length - 1]
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
   const [project, setProject] = useState({})
   const [fetchNew, setFetchNew] = useState(false)
-  const isAuthenticate = useSelector((state) => state.isAuthenticate)
   const [fileIsTranslating, setFileIsTranslating] = useState('')
 
 
@@ -70,37 +65,19 @@ const DetailProject = () => {
 
 
 
-  useEffect(() => {
-    const checkToken = async () => {
-      const getLocalToken = localStorage.getItem('token')
-      if (!getLocalToken) {
-        return navigate('/login')
-      }
-      try {
-        const config = {
-          headers: { Authorization: `Bearer ${getLocalToken}` },
-        };
-        const data = await axiosInstance.get(`/auth/check-token`, config)
-        dispatch({ type: 'login', userInformation: data.data.user })
-      }
-      catch (err) {
-        localStorage.removeItem('token')
-        return navigate('/login')
-      }
-    }
-    if (!isAuthenticate) {
-      checkToken()
-
-    }
-  }, [])
 
   useEffect(() => {
     const getDetailProject = async () => {
-      const data = await axiosInstance.get(`/project/detail/${lastParam}`)
-      if (data.data.status) {
-        setProject(data.data.data)
-        //setFileIsTranslating(data.data.data.slug)
+      try {
+        const data = await axiosInstance.get(`/project/detail/${lastParam}`)
+        console.log({ data })
+        if (data.data.status) {
+          setProject(data.data.data)
+        }
+      } catch (error) {
+        console.log(error)
       }
+
     }
     getDetailProject()
   }, [fetchNew])

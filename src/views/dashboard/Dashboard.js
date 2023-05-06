@@ -80,8 +80,6 @@ import { Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select } from '
 
 const Dashboard = () => {
 
-  const navigate = useNavigate()
-  const isAuthenticate = useSelector((state) => state.isAuthenticate)
 
   const dispatch = useDispatch()
   const [projectData, setProjectData] = useState([])
@@ -114,6 +112,7 @@ const Dashboard = () => {
     try {
       dispatch({ type: 'set-backdrop' })
       const data = await axiosInstance.get(`/project?${queryString.stringify(filters)}`)
+      console.log({ project: data })
       dispatch({ type: 'set-backdrop' })
       if (data.status == 200) {
         setProjectData(data.data.results)
@@ -123,30 +122,6 @@ const Dashboard = () => {
       dispatch({ type: 'set-backdrop' })
     }
   }
-
-  useEffect(() => {
-    const checkToken = async () => {
-      const getLocalToken = localStorage.getItem('token')
-      if (!getLocalToken) {
-        return navigate('/login')
-      }
-      try {
-        const config = {
-          headers: { Authorization: `Bearer ${getLocalToken}` },
-        };
-        const data = await axiosInstance.get(`/auth/check-token`, config)
-        dispatch({ type: 'login', userInformation: data.data.user })
-      }
-      catch (err) {
-        localStorage.removeItem('token')
-        return navigate('/login')
-      }
-    }
-    if (!isAuthenticate) {
-      checkToken()
-
-    }
-  }, [])
 
   useEffect(() => {
     fetchProject()
@@ -246,7 +221,7 @@ const Dashboard = () => {
                       label="Sort"
                       onChange={handleChangeSortBy}
                     >
-                      {sortConfig && Object.keys(sortConfig).map(item => <MenuItem value={sortConfig[item]}>{item}</MenuItem>)}
+                      {sortConfig && Object.keys(sortConfig).map((item, index) => <MenuItem key={index} value={sortConfig[item]}>{item}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </div>

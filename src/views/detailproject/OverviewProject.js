@@ -49,12 +49,6 @@ const Overview = ({ project, setFetchNew, handleChangeTab, setFileIsTranslating 
           }
         }
       )
-      if (data.data.status) {
-        toast.success(data.data.message, { autoClose: 3000 })
-      }
-      else {
-        toast.error(data.data.message, { autoClose: 3000 })
-      }
       setFetchNew(state => !state)
       dispatch({ type: 'set-backdrop' })
     } catch (error) {

@@ -12,39 +12,31 @@ import TableRow from '@mui/material/TableRow';
 
 import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
 
-function createData(
-  name,
-  calories,
-  fat,
-  carbs,
-  protein,
-) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
 
 const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   const [sentences, setSentences] = useState([])
+  const dispatch = useDispatch()
   useEffect(() => {
     const fetchSentences = async () => {
       const body = {
         projectId: project?.projects?.id,
         fileId: fileIsTranslating,
       }
-      const data = await axiosInstance.post('/project/open-file-of-project', body)
-      if (!data.data.status) {
-        toast.error(data.data.message)
-        return
+      try {
+        dispatch({ type: 'set-backdrop' })
+        const data = await axiosInstance.post('/project/open-file-of-project', body)
+        dispatch({ type: 'set-backdrop' })
+        if (!data.data.status) {
+          return
+        }
+        setSentences(data.data.data)
       }
-      setSentences(data.data.data)
+      catch (err) {
+        dispatch({ type: 'set-backdrop' })
+      }
+
 
 
     }
