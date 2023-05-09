@@ -12,17 +12,19 @@ import TableRow from '@mui/material/TableRow';
 
 import SendIcon from '@mui/icons-material/Send';
 import DownloadIcon from '@mui/icons-material/Download';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { Box, Button, FormControl, InputLabel, MenuItem, Pagination, Select, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, Menu, MenuItem, Pagination, Select, Stack, Tooltip, Typography } from '@mui/material';
 import queryString from 'query-string';
 
 const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   const [sentences, setSentences] = useState([])
   const [tm, setTm] = useState(null)
   const [openSelectTM, setOpenSelectTm] = useState(false);
+  const [rowChoose, setRowChoose] = useState(1);
 
   const [filters, setFilters] = useState({
     limit: 6,
@@ -32,6 +34,18 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
 
   const [totalPages, setTotalPages] = useState(1)
   const [totalResults, setTotalResults] = useState(0)
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleOpenFilterStatus = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseSelectStatus = (e) => {
+    setFilters({ ...filters, status: e.target.getAttribute('value') })
+    setAnchorEl(null);
+  };
 
   const dispatch = useDispatch()
   useEffect(() => {
@@ -78,35 +92,62 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
     setFilters({ ...filters, limit: e.target.value })
   }
 
-  const convertStatusSentenceToSquareColor = (status) => {
-    if (status == 'UN_TRANSLATE') {
-      return {
+  const handleChooseRow = (e) => {
+    console.log(e.target.querySelector('tr'))
+    setRowChoose(e.target.getAttribute('value'))
+  }
+
+  const getStatusSentence = () => {
+    return [
+      {
+        status: 'UN_TRANSLATE',
         tittle: 'Untranslated',
         color: '#afb3af'
-      }
-    }
-    if (status == 'REVIEW') {
-      return {
+      },
+      {
+        status: 'REVIEW',
         tittle: 'Reviewing',
         color: '#f09e07'
-      }
-    }
-    if (status == 'CONFIRM') {
-      return {
-        tittle: 'Confirm',
-        color: '#07f01b'
-      }
-    }
-    if (status == 'TRANSLATING') {
-      return {
+      },
+      {
+        status: 'TRANSLATING',
         tittle: 'Translating',
         color: '#f0071b'
-      }
-    }
+      },
+      {
+        status: 'CONFIRM',
+        tittle: 'Confirm',
+        color: '#07f01b'
+      },
+    ]
   }
+
+  const convertStatusSentenceToSquareColor = (status) => {
+    return getStatusSentence().filter(item => item.status == status)[0] || { status: 'null', tittle: 'All', color: 'black' }
+  }
+
+
 
   return (
     <>
+      <Menu
+        id="demo-positioned-menu"
+        aria-labelledby="demo-positioned-button"
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleCloseSelectStatus}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <MenuItem key={-1} onClick={handleCloseSelectStatus} sx={{ color: 'black' }} value={'null'}>All</MenuItem>
+        {getStatusSentence().map((item, index) => <MenuItem key={index} value={item.status} onClick={handleCloseSelectStatus} sx={{ color: item.color }}>{item.tittle}</MenuItem>)}
+      </Menu>
       <Grid2>
         <Paper sx={{ mb: 2, padding: 2 }} elevation={2} >
           <Box sx={{ justifyContent: 'space-between', display: 'flex' }}>
@@ -150,22 +191,31 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
                     <TableCell width='20'>STT </TableCell>
                     <TableCell>Source ({project?.projects?.sourceLanguage}) </TableCell>
                     <TableCell align="left">Target ({project?.projects?.targetLanguage}) </TableCell>
-                    <TableCell align="left">Status</TableCell>
+                    <TableCell align="left" sx={{ display: 'flex' }}>
+                      <div>Status</div>
+                      <div>
+                        <FilterAltIcon onClick={handleOpenFilterStatus} sx={{ color: convertStatusSentenceToSquareColor(filters.status).color }} />
+
+                      </div>
+                    </TableCell>
                     <TableCell align="left">Action</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
+                <TableBody onClick={handleChooseRow}>
                   {sentences.map((row, index) => (
                     <TableRow
                       key={row.name}
-                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                      sx={{ backgroundColor: row.index == rowChoose ? 'green' : 'inherit' }}
+
+                      value={row.index}
+
                     >
-                      <TableCell align="center">{index + 1}</TableCell>
-                      <TableCell component="th" scope="row" width='50%'>
+                      <TableCell align="center">{row.index}</TableCell>
+                      <TableCell component="th" scope="row" width='40%'>
                         {row.textSrc}
                       </TableCell>
-                      <TableCell align="left" width='50%'>{row.textTarget || '___'}</TableCell>
-                      <TableCell align="left" width='50%' >
+                      <TableCell align="left" width='40%'>{row.textTarget || '___'}</TableCell>
+                      <TableCell align="left" >
                         <Tooltip title={convertStatusSentenceToSquareColor(row.status).tittle}>
                           <Box sx={{ margin: 'auto', width: 18, height: 18, backgroundColor: convertStatusSentenceToSquareColor(row.status).color, borderRadius: '50%' }}>
 
