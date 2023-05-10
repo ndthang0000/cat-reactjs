@@ -25,6 +25,9 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   const [tm, setTm] = useState(null)
   const [openSelectTM, setOpenSelectTm] = useState(false);
   const [rowChoose, setRowChoose] = useState(1);
+  const [machineSuggest, setMachineSuggest] = useState('')
+  const [dictionarySuggest, setDictionarySuggest] = useState([])
+  const [fuzzyMatching, setFuzzyMatching] = useState([])
 
   const [filters, setFilters] = useState({
     limit: 6,
@@ -48,6 +51,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   };
 
   const dispatch = useDispatch()
+
   useEffect(() => {
     const fetchSentences = async () => {
       const body = {
@@ -62,6 +66,9 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
           return
         }
         setSentences(data.data.data.results)
+        if (data.data.data.results.length > 0) {
+          setRowChoose(data.data.data.results[0].index)
+        }
         setTotalPages(data.data.data.totalPages)
         setTotalResults(data.data.data.totalResults)
       }
@@ -71,6 +78,9 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
     }
     fetchSentences()
   }, [filters])
+
+  useEffect(() => {
+  }, [rowChoose])
 
   const handleSelectTM = (e) => {
     setTm(e.target.value)
@@ -93,8 +103,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   }
 
   const handleChooseRow = (e) => {
-    console.log(e.target.querySelector('tr'))
-    setRowChoose(e.target.getAttribute('value'))
+    setRowChoose(e.target.closest('tr').getAttribute('value'))
   }
 
   const getStatusSentence = () => {
@@ -201,14 +210,14 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
                     <TableCell align="left">Action</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody onClick={handleChooseRow}>
+                <TableBody>
                   {sentences.map((row, index) => (
                     <TableRow
                       key={row.name}
-                      sx={{ backgroundColor: row.index == rowChoose ? 'green' : 'inherit' }}
-
+                      //sx={{ backgroundColor: row.index == rowChoose ? 'green' : 'inherit' }}
+                      className={row.index == rowChoose && 'choose-row-current'}
                       value={row.index}
-
+                      onClick={handleChooseRow}
                     >
                       <TableCell align="center">{row.index}</TableCell>
                       <TableCell component="th" scope="row" width='40%'>
@@ -223,12 +232,13 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
 
                         </Tooltip>
                       </TableCell>
+                      <TableCell align="left">Confirm</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </TableContainer>
-            <Paper spacing={1} sx={{ padding: 1, display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+            <Paper spacing={1} sx={{ padding: 1, display: 'flex', justifyContent: 'space-between', mt: 1, alignItems: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <div style={{ fontSize: 12, fontWeight: 450, color: '#5c5e5d' }}>
                   Sentences per page
@@ -249,6 +259,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
                   </Select>
                 </FormControl>
               </Box>
+              <div style={{ fontSize: 12, fontWeight: 450, color: '#5c5e5d' }}>Have <span style={{ fontWeight: 600, fontStyle: 'italic' }}>{totalResults}</span> sentence in this file</div>
               <Pagination count={totalPages} color="primary" onChange={handlePaginate} />
             </Paper>
 
