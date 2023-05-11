@@ -69,14 +69,15 @@ import axiosInstance from '../../axios'
 
 import { useSelector, useDispatch } from 'react-redux'
 import moment from 'moment/moment'
-
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import AutoAwesomeMosaicIcon from '@mui/icons-material/AutoAwesomeMosaic';
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import { Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 
 const Dashboard = () => {
 
@@ -178,8 +179,16 @@ const Dashboard = () => {
         <CCol xs>
           <CCard className="mb-4">
             <CCardHeader >
-              Projects
-              <div className='mt-2' style={{ justifyContent: 'space-between', display: 'flex' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant='h6'>
+                  <AutoAwesomeMosaicIcon sx={{ mr: 0.5 }} />
+                  Projects</Typography>
+                <div className='create-new-project-btn'>
+                  <AddCircleOutlineIcon />
+                  <span>New Project</span>
+                </div>
+              </div>
+              <div className='mt-3' style={{ justifyContent: 'space-between', display: 'flex' }}>
 
                 <ButtonGroup
                   disableElevation

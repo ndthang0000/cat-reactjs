@@ -46,11 +46,38 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   };
 
   const handleCloseSelectStatus = (e) => {
-    setFilters({ ...filters, status: e.target.getAttribute('value') })
+    if (e.target.getAttribute('value') != null) {
+      setFilters({ ...filters, status: e.target.getAttribute('value') })
+    }
+
     setAnchorEl(null);
   };
 
   const dispatch = useDispatch()
+
+  const fetchMachineTranslate = async () => {
+    try {
+      const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
+      const data = await axiosInstance.post('/translate/machine-translate/sentence', { sentence: dataSentence })
+      if (data.data.status) {
+        setMachineSuggest(data.data.data)
+      }
+    } catch (err) {
+
+    }
+  }
+
+  const fetchFuzzyMatching = async () => {
+    try {
+      const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
+      const data = await axiosInstance.post('/translate/fuzzy-matching', { sentence: dataSentence })
+      if (data.data.status) {
+        setFuzzyMatching(data.data.data)
+      }
+    } catch (err) {
+
+    }
+  }
 
   useEffect(() => {
     const fetchSentences = async () => {
@@ -80,6 +107,8 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   }, [filters])
 
   useEffect(() => {
+    fetchMachineTranslate()
+    fetchFuzzyMatching()
   }, [rowChoose])
 
   const handleSelectTM = (e) => {
@@ -269,7 +298,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
           <Grid2 lg={12} xs={4} sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}>
             <Typography variant='h6' color='black'>Machine Translate:</Typography>
             <Paper variant='outline' elevation={2} >
-              Xin chào
+              {machineSuggest}
             </Paper >
           </Grid2>
           <Grid2 lg={12} xs={4} sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}>
@@ -282,7 +311,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
             <Typography variant='h6' color='black'>Fuzzy Match:</Typography>
 
             <Paper variant='outline' elevation={2} >
-              Fuzzy Match
+              {fuzzyMatching.map((item, index) => <Typography key={index} variant='subtitle1'>{item}</Typography>)}
             </Paper >
           </Grid2>
         </Grid2>

@@ -16,3 +16,17 @@
 .choose-row-current{
   background-color: rgba($color: #c9f054, $alpha: 0.4);
 }
+
+.create-new-project-btn{
+  color: black;
+  font-weight: 650;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 10px 20px;
+}
+.create-new-project-btn:hover{
+  background-color: #d4d6d9;
+  border-radius: 20px;
+}
