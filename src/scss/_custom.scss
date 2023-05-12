@@ -12,3 +12,10 @@
 .breadcrumb-custom{
   font-weight: 600;
 }
+
+.hover-text-decoration {
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}

@@ -1,27 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import queryString from 'query-string';
-
-
-
+import queryString from 'query-string'
 
 import { useLocation, useNavigate } from 'react-router-dom'
-
-
 
 import axiosInstance from '../../axios'
 
 import { useSelector, useDispatch } from 'react-redux'
 
-
-import Tabs from '@mui/material/Tabs';
-import Tab from '@mui/material/Tab';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-import Overview from './OverviewProject';
-import Translating from './Translating';
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
+import Overview from './OverviewProject'
+import Member from './MemberProject'
+import Activity from './ActivityProject'
+import Translating from './Translating'
 
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
+  const { children, value, index, ...other } = props
 
   return (
     <div
@@ -37,34 +33,28 @@ function TabPanel(props) {
         </Box>
       )}
     </div>
-  );
+  )
 }
 
 function a11yProps(index) {
   return {
     id: `simple-tab-${index}`,
     'aria-controls': `simple-tabpanel-${index}`,
-  };
+  }
 }
 
 const DetailProject = () => {
-
   const params = useLocation().pathname.split('/')
   const lastParam = params[params.length - 1]
   const [project, setProject] = useState({})
   const [fetchNew, setFetchNew] = useState(false)
   const [fileIsTranslating, setFileIsTranslating] = useState('')
 
-
-  const [value, setValue] = React.useState(3);
+  const [value, setValue] = React.useState(0)
 
   const handleChangeTab = (event, newValue) => {
-    setValue(newValue);
-  };
-
-
-
-
+    setValue(newValue)
+  }
 
   useEffect(() => {
     const getDetailProject = async () => {
@@ -77,11 +67,9 @@ const DetailProject = () => {
       } catch (error) {
         console.log(error)
       }
-
     }
     getDetailProject()
   }, [fetchNew])
-
 
   return (
     <>
@@ -89,27 +77,34 @@ const DetailProject = () => {
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChangeTab} aria-label="basic tabs example">
             <Tab label="Overview" {...a11yProps(0)} />
-            <Tab label="Activity" {...a11yProps(1)} />
-            <Tab label="Member" {...a11yProps(2)} />
+            <Tab label="Member" {...a11yProps(1)} />
+            <Tab label="Activity" {...a11yProps(2)} />
             <Tab label="Translating" {...a11yProps(3)} />
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          <Overview project={project} setFetchNew={setFetchNew} handleChangeTab={handleChangeTab} setFileIsTranslating={setFileIsTranslating} />
+          <Overview
+            project={project}
+            setFetchNew={setFetchNew}
+            handleChangeTab={handleChangeTab}
+            setFileIsTranslating={setFileIsTranslating}
+          />
         </TabPanel>
         <TabPanel value={value} index={1}>
-          Member
+          <Member project={project} />
         </TabPanel>
         <TabPanel value={value} index={2}>
-          Item Three
+          <Activity project={project} />
         </TabPanel>
         <TabPanel value={value} index={3}>
-          <Translating project={project} setFetchNew={setFetchNew} fileIsTranslating={fileIsTranslating} setFileIsTranslating={setFileIsTranslating} />
+          <Translating
+            project={project}
+            setFetchNew={setFetchNew}
+            fileIsTranslating={fileIsTranslating}
+            setFileIsTranslating={setFileIsTranslating}
+          />
         </TabPanel>
       </Box>
-
-
-
     </>
   )
 }
