@@ -19,9 +19,20 @@ import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
 import { Box, Button, FormControl, InputLabel, Menu, MenuItem, Pagination, Select, Stack, Tooltip, Typography } from '@mui/material';
 import queryString from 'query-string';
+import { useLocation } from 'react-router-dom';
 
-const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
+const Translating = () => {
+
+  const location = useLocation().pathname
+  console.log(location)
+  const pathName = location.split('/')
+  const fileId = pathName[pathName.length - 1]
+  const slugProject = pathName[pathName.length - 2]
+
+
   const [sentences, setSentences] = useState([])
+  const [project, setProject] = useState({})
+
   const [tm, setTm] = useState(null)
   const [openSelectTM, setOpenSelectTm] = useState(false);
   const [rowChoose, setRowChoose] = useState(1);
@@ -47,7 +58,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
 
   const handleCloseSelectStatus = (e) => {
     if (e.target.getAttribute('value') != null) {
-      setFilters({ ...filters, status: e.target.getAttribute('value') })
+      setFilters({ ...filters, status: e.target.getAttribute('value'), page: 1 })
     }
 
     setAnchorEl(null);
@@ -82,8 +93,8 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
   useEffect(() => {
     const fetchSentences = async () => {
       const body = {
-        projectId: project?.projects?.id,
-        fileId: fileIsTranslating,
+        slug: slugProject,
+        fileId: fileId,
       }
       try {
         dispatch({ type: 'set-backdrop' })
@@ -92,7 +103,9 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
         if (!data.data.status) {
           return
         }
+        localStorage.setItem('recent-translate', location)
         setSentences(data.data.data.results)
+        setProject(data.data.project)
         if (data.data.data.results.length > 0) {
           setRowChoose(data.data.data.results[0].index)
         }
@@ -216,7 +229,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
           </Box>
         </Paper>
       </Grid2>
-      <Grid2 container spacing={2}>
+      <Grid2 container spacing={2} sx={{ mb: 0.1 }}>
         <Grid2 xs={12} lg={8}>
           <Paper>
             <TableContainer component={Paper} sx={{
@@ -227,8 +240,8 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
                 <TableHead>
                   <TableRow>
                     <TableCell width='20'>STT </TableCell>
-                    <TableCell>Source ({project?.projects?.sourceLanguage}) </TableCell>
-                    <TableCell align="left">Target ({project?.projects?.targetLanguage}) </TableCell>
+                    <TableCell>Source ({project?.sourceLanguage}) </TableCell>
+                    <TableCell align="left">Target ({project?.targetLanguage}) </TableCell>
                     <TableCell align="left" sx={{ display: 'flex' }}>
                       <div>Status</div>
                       <div>
@@ -289,7 +302,7 @@ const Translating = ({ project, setFetchNew, fileIsTranslating }) => {
                 </FormControl>
               </Box>
               <div style={{ fontSize: 12, fontWeight: 450, color: '#5c5e5d' }}>Have <span style={{ fontWeight: 600, fontStyle: 'italic' }}>{totalResults}</span> sentence in this file</div>
-              <Pagination count={totalPages} color="primary" onChange={handlePaginate} />
+              <Pagination count={totalPages} color="primary" onChange={handlePaginate} page={filters.page} />
             </Paper>
 
           </Paper>

@@ -33,6 +33,19 @@ const AppBreadcrumb = () => {
         active: true,
       })
     }
+    if (location.includes('project/translate/')) {
+      breadcrumbs.push({
+        pathname: 'project/detail/' + params[params.length - 2],
+        name: params[params.length - 2],
+        active: false,
+      })
+      breadcrumbs.push({
+        pathname: location,
+        name: params[params.length - 1],
+        active: true,
+      })
+
+    }
     return breadcrumbs
   }
   const breadcrumbs = getBreadcrumbs(currentLocation)

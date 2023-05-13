@@ -2,6 +2,7 @@ import React from 'react'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
 const DetailProject = React.lazy(() => import('./views/detailproject/DetailProject'))
+const TranslateFile = React.lazy(() => import('./views/detailproject/Translating'))
 const Colors = React.lazy(() => import('./views/theme/colors/Colors'))
 const Typography = React.lazy(() => import('./views/theme/typography/Typography'))
 
@@ -55,6 +56,7 @@ const routes = [
   { path: '/', exact: true, name: 'Home', requireAuth: true },
   { path: '/project', name: 'Project', element: Dashboard, requireAuth: true },
   { path: '/project/detail/:slug', name: 'DetailProject', element: DetailProject, requireAuth: true },
+  { path: '/project/translate/:slug/:id', name: 'TranslateFile', element: TranslateFile, requireAuth: true },
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },

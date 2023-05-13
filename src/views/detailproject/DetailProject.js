@@ -56,7 +56,7 @@ const DetailProject = () => {
   const [fileIsTranslating, setFileIsTranslating] = useState('')
 
 
-  const [value, setValue] = React.useState(3);
+  const [value, setValue] = useState(0);
 
   const handleChangeTab = (event, newValue) => {
     setValue(newValue);

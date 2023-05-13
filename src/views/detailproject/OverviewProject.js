@@ -12,6 +12,7 @@ import moment from 'moment/moment';
 import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 
 const Overview = ({ project, setFetchNew, handleChangeTab, setFileIsTranslating }) => {
@@ -82,13 +83,17 @@ const Overview = ({ project, setFetchNew, handleChangeTab, setFileIsTranslating 
                   {item.nameFile}
                 </Typography>
                 <Typography sx={{ color: 'text.secondary', width: '33%' }} variant='subtitle2' >Last updated: {moment(item.updatedAt).fromNow()}</Typography>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginRight: 10 }} onClick={(e) => { handleChangeTab(e, 3); setFileIsTranslating(item.id) }}>
-                  <Avatar
+                <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginRight: 10 }}
+                // onClick={(e) => { handleChangeTab(e, 3); setFileIsTranslating(item.id) }}
+                >
+                  <Link to={`/project/translate/${project.projects.slug}/${item.id}`}>
 
-                    variant="rounded"
-                    src='https://images-storage-bucket.s3.ap-southeast-1.amazonaws.com/upload/avatar/icon/translation.png'
-                    sx={{ marginRight: 3 }}
-                  />
+                    <Avatar
+                      variant="rounded"
+                      src='https://images-storage-bucket.s3.ap-southeast-1.amazonaws.com/upload/avatar/icon/translation.png'
+                      sx={{ marginRight: 3 }}
+                    />
+                  </Link>
 
                 </div>
               </AccordionSummary>
