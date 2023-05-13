@@ -30,3 +30,10 @@
   background-color: #d4d6d9;
   border-radius: 20px;
 }
+
+.hover-text-decoration {
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
