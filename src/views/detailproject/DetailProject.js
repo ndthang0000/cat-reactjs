@@ -77,13 +77,17 @@ const DetailProject = () => {
       <Box sx={{ width: '100%' }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChangeTab} aria-label="basic tabs example">
-            <Tab label="Overview" {...a11yProps(0)} />
+            <Tab label="General" {...a11yProps(-1)} />
+            <Tab label="Manage File" {...a11yProps(0)} />
             <Tab label="Member" {...a11yProps(1)} />
             <Tab label="Activity" {...a11yProps(2)} />
             {/* <Tab label="Translating" {...a11yProps(3)} /> */}
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
+          Chưa có gì hết
+        </TabPanel>
+        <TabPanel value={value} index={1}>
           <Overview
             project={project}
             setFetchNew={setFetchNew}
@@ -91,19 +95,11 @@ const DetailProject = () => {
             setFileIsTranslating={setFileIsTranslating}
           />
         </TabPanel>
-        <TabPanel value={value} index={1}>
+        <TabPanel value={value} index={2}>
           <Member project={project} />
         </TabPanel>
-        <TabPanel value={value} index={2}>
-          <Activity project={project} />
-        </TabPanel>
         <TabPanel value={value} index={3}>
-          <Translating
-            project={project}
-            setFetchNew={setFetchNew}
-            fileIsTranslating={fileIsTranslating}
-            setFileIsTranslating={setFileIsTranslating}
-          />
+          <Activity project={project} />
         </TabPanel>
       </Box>
     </>

@@ -77,7 +77,7 @@ import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
-import { Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
+import { Alert, AlertTitle, Button, ButtonGroup, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material';
 
 const Dashboard = () => {
 
@@ -184,8 +184,10 @@ const Dashboard = () => {
                   <AutoAwesomeMosaicIcon sx={{ mr: 0.5 }} />
                   Projects</Typography>
                 <div className='create-new-project-btn'>
-                  <AddCircleOutlineIcon />
-                  <span>New Project</span>
+                  <Link to={'/create-new-project'} className='btn-create-project'>
+                    <AddCircleOutlineIcon />
+                    <span>New Project</span>
+                  </Link>
                 </div>
               </div>
               <div className='mt-3' style={{ justifyContent: 'space-between', display: 'flex' }}>
@@ -321,8 +323,14 @@ const Dashboard = () => {
               </CRow> */}
 
               <br />
-
-              <CTable align="middle" className="mb-0 border" hover responsive>
+              {
+                projectData.length == 0 ?
+                  <Alert severity="info">
+                    <AlertTitle>Nothing Project</AlertTitle>
+                    You not join or is owner of any project — <Link to={'/create-new-project'}><strong>Let create your project</strong></Link>
+                  </Alert> :
+                  <>
+                    <CTable align="middle" className="mb-0 border" hover responsive>
                 <CTableHead color="light">
                   <CTableRow>
                     <CTableHeaderCell className="text-center">
@@ -338,12 +346,8 @@ const Dashboard = () => {
                   </CTableRow>
                 </CTableHead>
                 <CTableBody>
-                  {
-                    projectData.length == 0
-                      ?
-                      'Nothing'
-                      :
-                      projectData.map((item, index) => (
+
+                        {projectData.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">
                         <CAvatar size="lg" src={item.image} status={convertStatusProject(item.status)} />
@@ -401,6 +405,9 @@ const Dashboard = () => {
                 )}
                 <CPaginationItem disabled={filters.page == totalPages ? true : false} value={filters.page + 1}>Next</CPaginationItem>
               </CPagination>
+                  </>
+              }
+
             </CCardBody>
           </CCard>
         </CCol>
