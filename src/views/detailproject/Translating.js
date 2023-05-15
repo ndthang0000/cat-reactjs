@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
-import Grid2 from '@mui/material/Unstable_Grid2';
+import Paper from '@mui/material/Paper'
+import { styled } from '@mui/material/styles'
+import Grid2 from '@mui/material/Unstable_Grid2'
 
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
 
 import SendIcon from '@mui/icons-material/Send';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -23,8 +23,18 @@ import { useLocation } from 'react-router-dom';
 
 const Translating = () => {
 
+  const sentenceInitState = [
+    { name: '1', textSrc: 'this is a very old village', textTarget: '', status: 'UN_TRANSLATE' },
+    { name: '2', textSrc: '亲爱的', textTarget: '', status: 'UN_TRANSLATE' },
+    { name: '3', textSrc: "i'm just a student", textTarget: '', status: 'UN_TRANSLATE' },
+    { name: '4', textSrc: 'this is a very old village', textTarget: '', status: 'UN_TRANSLATE' },
+    { name: '5', textSrc: '아무것도 생각하지 마', textTarget: '', status: 'UN_TRANSLATE' },
+    { name: '6', textSrc: 'cut the crap', textTarget: '', status: 'UN_TRANSLATE' },
+    { name: '7', textSrc: 'mark my words', textTarget: 'nhớ lời tôi đấy', status: 'CONFIRM' },
+    { name: '8', textSrc: 'you are way out of line', textTarget: '', status: 'UN_TRANSLATE' },
+  ]
+
   const location = useLocation().pathname
-  console.log(location)
   const pathName = location.split('/')
   const fileId = pathName[pathName.length - 1]
   const slugProject = pathName[pathName.length - 2]
@@ -43,7 +53,7 @@ const Translating = () => {
   const [filters, setFilters] = useState({
     limit: 6,
     page: 1,
-    status: 'null'
+    status: 'null',
   })
 
   const [totalPages, setTotalPages] = useState(1)
@@ -98,7 +108,10 @@ const Translating = () => {
       }
       try {
         dispatch({ type: 'set-backdrop' })
-        const data = await axiosInstance.post(`/project/open-file-of-project?${queryString.stringify(filters)}`, body)
+        const data = await axiosInstance.post(
+          `/project/open-file-of-project?${queryString.stringify(filters)}`,
+          body,
+        )
         dispatch({ type: 'set-backdrop' })
         if (!data.data.status) {
           return
@@ -111,8 +124,7 @@ const Translating = () => {
         }
         setTotalPages(data.data.data.totalPages)
         setTotalResults(data.data.data.totalResults)
-      }
-      catch (err) {
+      } catch (err) {
         dispatch({ type: 'set-backdrop' })
       }
     }
@@ -123,6 +135,20 @@ const Translating = () => {
     fetchMachineTranslate()
     fetchFuzzyMatching()
   }, [rowChoose])
+
+  const handleTranslate = async (source) => {
+    const response = await axiosElastic.post('/test_cat.transmems/_search', {
+      query: {
+        match: {
+          source: source
+        }
+      }
+    })
+
+    const data = response.data.hits.hits.length >= 3 ? response.data.hits.hits.slice(0, 3) : response.data.hits.hits
+    console.log('type', data)
+    setFuzzies(data)
+  }
 
   const handleSelectTM = (e) => {
     setTm(e.target.value)
@@ -200,10 +226,10 @@ const Translating = () => {
         {getStatusSentence().map((item, index) => <MenuItem key={index} value={item.status} onClick={handleCloseSelectStatus} sx={{ color: item.color }}>{item.tittle}</MenuItem>)}
       </Menu>
       <Grid2>
-        <Paper sx={{ mb: 2, padding: 2 }} elevation={2} >
+        <Paper sx={{ mb: 2, padding: 2 }} elevation={2}>
           <Box sx={{ justifyContent: 'space-between', display: 'flex' }}>
-            <Tooltip title="TM is Translation memory. Help ......" placement='top-start'>
-              <FormControl sx={{ minWidth: 200, }}>
+            <Tooltip title="TM is Translation memory. Help ......" placement="top-start">
+              <FormControl sx={{ minWidth: 200 }}>
                 <InputLabel id="demo-simple-select-label">Translation Memory</InputLabel>
                 <Select
                   labelId="demo-simple-select-label"
@@ -221,7 +247,6 @@ const Translating = () => {
                   <MenuItem value={30}>TM3</MenuItem>
                 </Select>
               </FormControl>
-
             </Tooltip>
             <Button variant="outlined" color="error" startIcon={<DownloadIcon />}>
               Download file Target
@@ -232,10 +257,17 @@ const Translating = () => {
       <Grid2 container spacing={2} sx={{ mb: 0.1 }}>
         <Grid2 xs={12} lg={8}>
           <Paper>
-            <TableContainer component={Paper} sx={{
-              maxHeight: 400, overflow: 'scroll', overflowY: 'auto', overflowX: 'auto', scrollbarWidth: 'thin', scrollbarColor: 'green'
-            }}>
-
+            <TableContainer
+              component={Paper}
+              sx={{
+                maxHeight: 400,
+                overflow: 'scroll',
+                overflowY: 'auto',
+                overflowX: 'auto',
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'green',
+              }}
+            >
               <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                 <TableHead>
                   <TableRow>
@@ -250,8 +282,8 @@ const Translating = () => {
                       </div>
                     </TableCell>
                     <TableCell align="left">Action</TableCell>
-                  </TableRow>
-                </TableHead>
+                  </TableRow >
+                </TableHead >
                 <TableBody>
                   {sentences.map((row, index) => (
                     <TableRow
@@ -268,23 +300,27 @@ const Translating = () => {
                       <TableCell align="left" width='40%'>{row.textTarget || '___'}</TableCell>
                       <TableCell align="left" >
                         <Tooltip title={convertStatusSentenceToSquareColor(row.status).tittle}>
-                          <Box sx={{ margin: 'auto', width: 18, height: 18, backgroundColor: convertStatusSentenceToSquareColor(row.status).color, borderRadius: '50%' }}>
-
-                          </Box>
-
+                          <Box
+                            sx={{
+                              margin: 'auto',
+                              width: 18,
+                              height: 18,
+                              backgroundColor: convertStatusSentenceToSquareColor(row.status).color,
+                              borderRadius: '50%',
+                            }}
+                          ></Box>
                         </Tooltip>
                       </TableCell>
                       <TableCell align="left">Confirm</TableCell>
                     </TableRow>
                   ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                </TableBody >
+              </Table >
+            </TableContainer >
             <Paper spacing={1} sx={{ padding: 1, display: 'flex', justifyContent: 'space-between', mt: 1, alignItems: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <div style={{ fontSize: 12, fontWeight: 450, color: '#5c5e5d' }}>
                   Sentences per page
-
                 </div>
                 <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
                   <Select
@@ -304,9 +340,8 @@ const Translating = () => {
               <div style={{ fontSize: 12, fontWeight: 450, color: '#5c5e5d' }}>Have <span style={{ fontWeight: 600, fontStyle: 'italic' }}>{totalResults}</span> sentence in this file</div>
               <Pagination count={totalPages} color="primary" onChange={handlePaginate} page={filters.page} />
             </Paper>
-
           </Paper>
-        </Grid2>
+        </Grid2 >
         <Grid2 xs={12} lg={4} container>
           <Grid2 lg={12} xs={4} sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}>
             <Typography variant='h6' color='black'>Machine Translate:</Typography>
@@ -314,20 +349,32 @@ const Translating = () => {
               {machineSuggest}
             </Paper >
           </Grid2>
-          <Grid2 lg={12} xs={4} sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}>
-            <Typography variant='h6' color='black'>Dictionary:</Typography>
-            <Paper variant='outline' elevation={2} >
+          <Grid2
+            lg={12}
+            xs={4}
+            sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}
+          >
+            <Typography variant="h6" color="black">
+              Dictionary:
+            </Typography>
+            <Paper variant="outline" elevation={2}>
               Dictionary
-            </Paper >
+            </Paper>
           </Grid2>
-          <Grid2 lg={12} xs={4} sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}>
-            <Typography variant='h6' color='black'>Fuzzy Match:</Typography>
+          <Grid2
+            lg={12}
+            xs={4}
+            sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}
+          >
+            <Typography variant="h6" color="black">
+              Fuzzy Match:
+            </Typography>
 
             <Paper variant='outline' elevation={2} >
               {fuzzyMatching.map((item, index) => <Typography key={index} variant='subtitle1'>{item}</Typography>)}
             </Paper >
-          </Grid2>
-        </Grid2>
+          </Grid2 >
+        </Grid2 >
         {/* <Grid2 xs={12} lg={4} container spacing={2}>
           <Grid2 lg={12} xs={4} sx={{ backgroundColor: 'red' }}>
             <Paper variant='outline' elevation={2} >
@@ -339,9 +386,7 @@ const Translating = () => {
             <Grid2 lg={12} xs={4}><Paper variant='outline' elevation={2} >3</Paper></Grid2>
           </Grid2>
         </Grid2> */}
-
-      </Grid2>
-
+      </Grid2 >
     </>
   )
 }

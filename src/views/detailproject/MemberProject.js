@@ -1,3 +1,4 @@
+
 import { cilPeople, cilTrash } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import {
@@ -16,7 +17,9 @@ import Modal from '@mui/material/Modal'
 import Typography from '@mui/material/Typography'
 import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import axiosInstance from '../../axios'
+import axios from 'axios'
 
 const style = {
   position: 'absolute',
@@ -29,6 +32,8 @@ const style = {
 }
 
 const Member = ({ project }) => {
+  const [roleConfig, setRoleConfig] = useState([])
+
   const [role, setRole] = React.useState('')
   const [open, setOpen] = React.useState(false)
 
@@ -38,6 +43,18 @@ const Member = ({ project }) => {
     setRole('')
     setOpen(false)
   }
+
+  const fetchRoleProject = async () => {
+    try {
+      const data = await axiosInstance.get('/project/get-role-of-project')
+      setRoleConfig(data.data.data)
+    } catch (error) {
+
+    }
+  }
+  useEffect(() => {
+    fetchRoleProject()
+  }, [])
 
   return (
     <Paper elevation={6} sx={{ padding: 3 }}>
@@ -92,15 +109,8 @@ const Member = ({ project }) => {
             <FormControl size="small" className="m-0 w-100 mb-3">
               <InputLabel>Role</InputLabel>
               <Select value={role} label="Role" onChange={(event) => { setRole(event.target.value) }}>
-                {/* {sortConfig &&
-                    Object.keys(sortConfig).map((item, index) => (
-                      <MenuItem key={index} value={sortConfig[item]}>
-                        {item}
-                      </MenuItem>
-                    ))} */}
-                <MenuItem value="Manager">Manager</MenuItem>
-                <MenuItem value="Translator">Translator</MenuItem>
-                <MenuItem value="Beta">Beta</MenuItem>
+
+                {roleConfig.map((item, index) => <MenuItem value={item} key={index}>{item}</MenuItem>)}
               </Select>
             </FormControl>
 
