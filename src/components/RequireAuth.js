@@ -26,6 +26,14 @@ const RequireAuth = ({ children }) => {
     }
   }
 
+  const register = (username, email, password) => {
+    return axiosInstance.post(`/auth/register`, {
+      username,
+      email,
+      password,
+    });
+  };
+
 
   useEffect(() => {
     if (!isAuthenticate) {
