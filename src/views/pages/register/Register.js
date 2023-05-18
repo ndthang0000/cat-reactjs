@@ -1,4 +1,8 @@
 import React,{useState} from 'react'
+import axios from "axios";
+import axiosInstance from 'src/axios'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify';
 import {
   CButton,
   CCard,
@@ -31,6 +35,7 @@ const isEmailValid=(email)=>{
   return /\S+@\S+\.\S+/.test(email)
 }
 const Register = () => {
+  const navigate = useNavigate()
   const[formValue,setFormValue] = useState(initFormValue)
   const[formError, setFormError] = useState({})
 
@@ -74,6 +79,16 @@ const Register = () => {
     event.preventDefault();
     if(validateForm()){
       console.log("form value", formValue)
+      const userData={
+        name:formValue.name,
+        email:formValue.email,
+        password:formValue.password
+      }
+      axiosInstance.post(`/auth/register`,userData).then((response)=>{
+        console.log(response.status,response.data.token)
+        toast.success('Register Successfully', { autoClose: 3000 })
+        navigate('/login')
+      })
     }else{
       console.log("form invalid")
     }
