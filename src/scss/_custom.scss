@@ -63,3 +63,35 @@
     color: black;
   }
 }
+
+.image-detail-project{
+  width: 100%;
+  height: auto;
+  border-radius: 50%;
+  
+}
+
+.tab1-general-detail-project{
+  background-color: #d3dcf5;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.form-label-project{
+  font-size: 16px;
+  font-weight: 550;
+  color: #8d8e91;
+  margin-left: 8px;
+  margin-bottom: 3px;
+}
+
+.form-group{
+  margin-bottom: 15px;
+}
+
+.edit-icon-detail-project{
+  cursor: pointer;
+  &:hover{
+    color: black;
+  }
+}

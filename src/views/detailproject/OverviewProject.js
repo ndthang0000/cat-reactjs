@@ -17,7 +17,6 @@ import { CProgress } from '@coreui/react'
 
 const Overview = ({ project, setFetchNew }) => {
   const [filesToUpload, setFilesToUpload] = useState([])
-  const isShowBackdrop = useSelector((state) => state.isShowBackdrop)
   const dispatch = useDispatch()
 
   const handleFilesChange = (files) => {
@@ -186,7 +185,7 @@ const Overview = ({ project, setFetchNew }) => {
           }}
         />
         <Stack direction="row" alignItems="center" spacing={2} justifyContent="center">
-          <Button variant="contained" component="label" onClick={handleUploadFileToServer}>
+          <Button variant="contained" component="label" onClick={handleUploadFileToServer} disabled={filesToUpload.length == 0} sx={{ mt: 3 }}>
             Upload
           </Button>
         </Stack>

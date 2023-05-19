@@ -79,7 +79,12 @@ const Translating = () => {
   const fetchMachineTranslate = async () => {
     try {
       const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
-      const data = await axiosInstance.post('/translate/machine-translate/sentence', { sentence: dataSentence })
+      const data = await axiosInstance.post('/translate/machine-translate/sentence',
+        {
+          sentence: dataSentence,
+          target: project.targetLanguage
+        }
+      )
       if (data.data.status) {
         setMachineSuggest(data.data.data)
       }

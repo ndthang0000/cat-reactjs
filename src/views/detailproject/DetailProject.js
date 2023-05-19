@@ -15,6 +15,7 @@ import Overview from './OverviewProject'
 import Member from './MemberProject'
 import Activity from './ActivityProject'
 import Translating from './Translating'
+import GeneralProject from './GeneralProject'
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props
@@ -85,7 +86,10 @@ const DetailProject = () => {
           </Tabs>
         </Box>
         <TabPanel value={value} index={0}>
-          Chưa có gì hết
+          <GeneralProject
+            project={project}
+            handleChangeTab={handleChangeTab}
+            setFetchNew={setFetchNew} />
         </TabPanel>
         <TabPanel value={value} index={1}>
           <Overview
