@@ -6,6 +6,7 @@ import AppHeaderDropdown from './header/AppHeaderDropdown'
 import DocsCallout from './DocsCallout'
 import DocsLink from './DocsLink'
 import DocsExample from './DocsExample'
+import AppSidebar from './AppSidebar'
 
 export {
   AppBreadcrumb,
@@ -13,6 +14,7 @@ export {
   AppFooter,
   AppHeader,
   AppHeaderDropdown,
+  AppSidebar,
   DocsCallout,
   DocsLink,
   DocsExample,
