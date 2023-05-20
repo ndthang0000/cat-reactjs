@@ -22,23 +22,10 @@ import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
 
 const Translating = () => {
-
-  const sentenceInitState = [
-    { name: '1', textSrc: 'this is a very old village', textTarget: '', status: 'UN_TRANSLATE' },
-    { name: '2', textSrc: '亲爱的', textTarget: '', status: 'UN_TRANSLATE' },
-    { name: '3', textSrc: "i'm just a student", textTarget: '', status: 'UN_TRANSLATE' },
-    { name: '4', textSrc: 'this is a very old village', textTarget: '', status: 'UN_TRANSLATE' },
-    { name: '5', textSrc: '아무것도 생각하지 마', textTarget: '', status: 'UN_TRANSLATE' },
-    { name: '6', textSrc: 'cut the crap', textTarget: '', status: 'UN_TRANSLATE' },
-    { name: '7', textSrc: 'mark my words', textTarget: 'nhớ lời tôi đấy', status: 'CONFIRM' },
-    { name: '8', textSrc: 'you are way out of line', textTarget: '', status: 'UN_TRANSLATE' },
-  ]
-
   const location = useLocation().pathname
   const pathName = location.split('/')
   const fileId = pathName[pathName.length - 1]
   const slugProject = pathName[pathName.length - 2]
-
 
   const [sentences, setSentences] = useState([])
   const [project, setProject] = useState({})

@@ -105,8 +105,7 @@ const Overview = ({ project, setFetchNew }) => {
                     <Typography sx={{ width: '75%' }}>
                       <div className="clearfix">
                         <div className="float-start">
-                          <strong>50%</strong>
-                          {/* <strong>{item.percentComplete}%</strong> */}
+                          <strong>{item.percentComplete}%</strong>
                         </div>
                         <div className="float-end">
                           <strong className="text-medium-emphasis">100%</strong>
@@ -116,8 +115,7 @@ const Overview = ({ project, setFetchNew }) => {
                         thin
                         color="yellow"
                         // color={convertStatusProject(item.status)}
-                        // value={item.percentComplete}
-                        value="50"
+                        value={item.percentComplete}
                       />
                     </Typography>
                   </Typography>

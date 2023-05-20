@@ -1,4 +1,3 @@
-
 import { cilPeople, cilTrash } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 import {
@@ -11,15 +10,15 @@ import {
   CTableRow,
 } from '@coreui/react'
 import { FormControl, InputLabel, MenuItem, Select, Stack } from '@mui/material'
-import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
-import Typography from '@mui/material/Typography'
 import Paper from '@mui/material/Paper'
 import TextField from '@mui/material/TextField'
-import React, { useEffect, useState } from 'react'
+import Typography from '@mui/material/Typography'
+import { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
 import axiosInstance from '../../axios'
-import axios from 'axios'
 
 const style = {
   position: 'absolute',
@@ -32,13 +31,47 @@ const style = {
 }
 
 const Member = ({ project }) => {
+  const userInformation = useSelector((state) => state.userInformation)
+  
   const [roleConfig, setRoleConfig] = useState([])
+  const [role, setRole] = useState('')
+  const [email, setEmail] = useState('')
+  const [open, setOpen] = useState(false)
 
-  const [role, setRole] = React.useState('')
-  const [open, setOpen] = React.useState(false)
+  const handleRemoveMember = async (id) => {
+    const body = {
+      id: id,
+      projectId: (project.projects && project.projects.id) ? project.projects.id : ''
+    }
 
-  const handleRemoveMember = () => {}
+    try {
+      const response = await axiosInstance.post('project/remove-member', body)
+      if (response.data.status) {
+        toast.success("Remove member successfully", { autoClose: 3000 })
+      }
+    }
+    catch (err) {}
+  }
+
+  const handleAddMember = async () => {
+    const body = {
+      projectId: (project.projects && project.projects.id) ? project.projects.id : '',
+      role: role,
+      email: email
+    }
+
+    try {
+      const response = await axiosInstance.post('project/add-member', body)
+      if (response.data.status) {
+        toast.success("Add new member successfully", { autoClose: 3000 })
+        setRole('')
+        setOpen(false)
+      }
+    } catch (error) {}
+  }
+
   const handleOpen = () => setOpen(true)
+
   const handleClose = () => {
     setRole('')
     setOpen(false)
@@ -52,47 +85,25 @@ const Member = ({ project }) => {
 
     }
   }
+
   useEffect(() => {
     fetchRoleProject()
   }, [])
 
+  const hasRole = () => {
+    if (project.projects) {
+      const result = project.projects.members.find(member => member.userId.userId === userInformation.userId)
+      if (result && (result.role === 'PROJECT MANAGER' || result.role === 'OWNER')) {
+        return true
+      }
+    }
+    return false
+  }
+
   return (
     <Paper elevation={6} sx={{ padding: 3 }}>
-      <CTable align="middle" className="mb-0 border" hover responsive>
-        <CTableHead color="light">
-          <CTableRow>
-            <CTableHeaderCell className="text-center">
-              <CIcon icon={cilPeople} />
-            </CTableHeaderCell>
-            <CTableHeaderCell>Name</CTableHeaderCell>
-            <CTableHeaderCell>Role</CTableHeaderCell>
-            <CTableHeaderCell className="text-center">Action</CTableHeaderCell> {/* if owner */}
-          </CTableRow>
-        </CTableHead>
-
-        <CTableBody>
-          {project.projects &&
-            project.projects.members.map((item, index) => (
-              <CTableRow v-for="item in tableItems" key={index}>
-                <CTableDataCell className="text-center">
-                  <CAvatar size="lg" src="./1.jpg" />
-                  {/* <CAvatar size="lg" src={item.avatar} /> */}
-                </CTableDataCell>
-                <CTableDataCell>
-                  <div className="small text-medium-emphasis">Nguyen Duc Thang</div>
-                  {/* <div className="small text-medium-emphasis">{item.name}</div> */}
-                </CTableDataCell>
-                <CTableDataCell>{item.role}</CTableDataCell>
-                <CTableDataCell className="text-center">
-                  <CIcon icon={cilTrash} className="cursor-pointer" onClick={handleRemoveMember} />
-                </CTableDataCell>
-              </CTableRow>
-            ))}
-        </CTableBody>
-      </CTable>
-
-      <Stack direction="row" alignItems="center" spacing={2} justifyContent="center">
-        <Button variant="contained" className="mt-4" onClick={handleOpen}>
+      {hasRole() ? <Stack direction="row" alignItems="center" spacing={2}>
+        <Button variant="contained" className="mb-4" onClick={handleOpen}>
           Add member
         </Button>
         <Modal
@@ -105,11 +116,10 @@ const Member = ({ project }) => {
             <Typography variant="h6" className="mb-4">
               Add new member to your project
             </Typography>
-            <TextField size="small" label="Email" variant="outlined" className="m-0 w-100 mb-3" />
+            <TextField size="small" label="Email" variant="outlined" className="m-0 w-100 mb-3" onChange={(e) =>{setEmail(e.target.value)}} />
             <FormControl size="small" className="m-0 w-100 mb-3">
               <InputLabel>Role</InputLabel>
               <Select value={role} label="Role" onChange={(event) => { setRole(event.target.value) }}>
-
                 {roleConfig.map((item, index) => <MenuItem value={item} key={index}>{item}</MenuItem>)}
               </Select>
             </FormControl>
@@ -118,13 +128,44 @@ const Member = ({ project }) => {
               <Button variant="outlined" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button variant="contained" className="ms-2">
+              <Button variant="contained" className="ms-2" onClick={handleAddMember}>
                 Add
               </Button>
             </Stack>
           </Paper>
         </Modal>
-      </Stack>
+      </Stack> : <></>}
+
+      <CTable align="middle" className="mb-0 border" hover responsive>
+        <CTableHead color="light">
+          <CTableRow>
+            <CTableHeaderCell className="text-center">
+              <CIcon icon={cilPeople} />
+            </CTableHeaderCell>
+            <CTableHeaderCell>Name</CTableHeaderCell>
+            <CTableHeaderCell>Role</CTableHeaderCell>
+            {hasRole() ? <CTableHeaderCell className="text-center">Action</CTableHeaderCell> : <></>}
+          </CTableRow>
+        </CTableHead>
+
+        <CTableBody>
+          {project.projects &&
+            project.projects.members.map((item, index) => (
+              <CTableRow v-for="item in tableItems" key={index}>
+                <CTableDataCell className="text-center">
+                  <CAvatar size="lg" src={item.userId.avatar} />
+                </CTableDataCell>
+                <CTableDataCell>
+                  <div className="small text-medium-emphasis">{item.userId.name}</div>
+                </CTableDataCell>
+                <CTableDataCell>{item.role}</CTableDataCell>
+                {hasRole() ? <CTableDataCell className="text-center">
+                  <CIcon icon={cilTrash} className="cursor-pointer" onClick={() => handleRemoveMember(item._id)} />
+                </CTableDataCell> : <></>}
+              </CTableRow>
+            ))}
+        </CTableBody>
+      </CTable>
     </Paper>
   )
 }
