@@ -104,19 +104,18 @@ const Overview = ({ project, setFetchNew }) => {
                     <Typography sx={{ width: '75%' }}>
                       <div className="clearfix">
                         <div className="float-start">
-                          <strong>50%</strong>
-                          {/* <strong>{item.percentComplete}%</strong> */}
+                          <strong>{item.percentComplete}%</strong>
                         </div>
                         <div className="float-end">
                           <strong className="text-medium-emphasis">100%</strong>
                         </div>
                       </div>
                       <CProgress
+
                         thin
                         color="yellow"
-                        // color={convertStatusProject(item.status)}
-                        // value={item.percentComplete}
-                        value="50"
+                        //color={convertStatusProject(item.status)}
+                        value={item.percentComplete}
                       />
                     </Typography>
                   </Typography>
@@ -144,7 +143,7 @@ const Overview = ({ project, setFetchNew }) => {
                 </AccordionSummary>
                 <AccordionDetails className="d-flex justify-content-between align-items-end">
                   <div>
-                    <Typography>Language: EN-VI{/* Language: {item.language} */}</Typography>
+                    <Typography>Language: {project.projects?.sourceLanguage}-{project.projects?.targetLanguage}</Typography>
                     <Typography>Quantity Sentence: {item.quantitySentence}</Typography>
                     <Typography>Created At: {moment(item.createdAt).format('LLL')}</Typography>
                   </div>

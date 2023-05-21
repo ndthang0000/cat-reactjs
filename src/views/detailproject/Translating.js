@@ -14,12 +14,25 @@ import SendIcon from '@mui/icons-material/Send';
 import DownloadIcon from '@mui/icons-material/Download';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
+import FileCopyIcon from '@mui/icons-material/FileCopyOutlined';
+import SaveIcon from '@mui/icons-material/Save';
+import PrintIcon from '@mui/icons-material/Print';
+import ShareIcon from '@mui/icons-material/Share';
+import EditIcon from '@mui/icons-material/Edit';
+
 import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { Box, Button, FormControl, InputLabel, Menu, MenuItem, Pagination, Select, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Button, FormControl, InputLabel, Menu, MenuItem, Pagination, Select, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, Tooltip, Typography } from '@mui/material';
 import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
+
+const actions = [
+  { icon: <FileCopyIcon />, name: 'Copy' },
+  { icon: <SaveIcon />, name: 'Save' },
+  { icon: <PrintIcon />, name: 'Print' },
+  { icon: <ShareIcon />, name: 'Share' },
+];
 
 const Translating = () => {
 
@@ -392,6 +405,21 @@ const Translating = () => {
           </Grid2>
         </Grid2> */}
       </Grid2 >
+      <Box sx={{ height: 0, transform: 'translateZ(0px)', flexGrow: 1 }}>
+        <SpeedDial
+          ariaLabel="SpeedDial openIcon example"
+          sx={{ position: 'absolute', bottom: 16, right: 16 }}
+          icon={<SpeedDialIcon openIcon={<EditIcon />} />}
+        >
+          {actions.map((action) => (
+            <SpeedDialAction
+              key={action.name}
+              icon={action.icon}
+              tooltipTitle={action.name}
+            />
+          ))}
+        </SpeedDial>
+      </Box>
     </>
   )
 }

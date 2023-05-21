@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import Grid2 from '@mui/material/Unstable_Grid2'
 import { styled } from '@mui/material/styles';
 import { Box } from '@mui/system';
-import moment from 'moment';
+import moment from 'moment'
 import { CProgress } from '@coreui/react';
 import TourIcon from '@mui/icons-material/Tour';
 import CachedIcon from '@mui/icons-material/Cached';
@@ -184,7 +184,8 @@ function GeneralProject({ project, handleChangeTab, setFetchNew }) {
               <div className="float-end">
                 <strong className="text-medium-emphasis">100%</strong>
               </div>
-            </div>
+            </div> 
+
             <CProgress thin color={convertStatusProject(project.projects?.status)} value={project.projects?.percentComplete} />
             <p style={{ marginTop: 20 }}><strong>Create at:</strong> <span style={{ color: '#2b6fd6', textAlign: 'center' }}>{moment(project.projects?.createdAt).format('LLL')}</span></p>
             <p><strong>Owner:</strong> <span style={{ color: '#2b6fd6', textDecoration: 'underline', textAlign: 'center' }}>{project.owner?.name}</span></p>
@@ -193,7 +194,13 @@ function GeneralProject({ project, handleChangeTab, setFetchNew }) {
           </div>
         </Grid2>
         <Grid2 md={8} sm={12}>
-          <div style={{ fontSize: 24, fontWeight: 600, marginBottom: 20 }}>Project Detail Information {!isViewPortEdit && <Tooltip title="Edit Project"><ModeEditIcon className='edit-icon-detail-project' onClick={handleViewPortEdit} /></Tooltip>} </div>
+          <div style={{ fontSize: 24, fontWeight: 600, marginBottom: 20, display: 'flex', justifyContent: 'space-between' }}>
+            <div>Project Detail Information</div>
+            <div>
+              {!isViewPortEdit && <Tooltip title="Edit Project"><ModeEditIcon className='edit-icon-detail-project' onClick={handleViewPortEdit} /></Tooltip>}
+            </div>
+          </div>
+
           <form>
             <div className="form-group">
               <label for="exampleFormControlInput1" className='form-label-project' >Project Name</label>
