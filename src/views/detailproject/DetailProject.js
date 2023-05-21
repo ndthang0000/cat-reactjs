@@ -100,7 +100,7 @@ const DetailProject = () => {
           />
         </TabPanel>
         <TabPanel value={value} index={2}>
-          <Member project={project} />
+          <Member project={project} setFetchNew={setFetchNew} />
         </TabPanel>
         <TabPanel value={value} index={3}>
           <Activity project={project} />

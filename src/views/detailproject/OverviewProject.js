@@ -114,7 +114,7 @@ const Overview = ({ project, setFetchNew }) => {
 
                         thin
                         color="yellow"
-                        //color={convertStatusProject(item.status)}
+                        // color={convertStatusProject(item.status)}
                         value={item.percentComplete}
                       />
                     </Typography>
