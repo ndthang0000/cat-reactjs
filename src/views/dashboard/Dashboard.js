@@ -331,80 +331,80 @@ const Dashboard = () => {
                   </Alert> :
                   <>
                     <CTable align="middle" className="mb-0 border" hover responsive>
-                <CTableHead color="light">
-                  <CTableRow>
-                    <CTableHeaderCell className="text-center">
-                      <CIcon icon={cilPeople} />
-                    </CTableHeaderCell>
-                    <CTableHeaderCell >Project Name</CTableHeaderCell>
-                    <CTableHeaderCell >Owner</CTableHeaderCell>
-                    <CTableHeaderCell >Progress</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Language</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Files</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Last update</CTableHeaderCell>
-                    <CTableHeaderCell className="text-center">Action</CTableHeaderCell>
-                  </CTableRow>
-                </CTableHead>
-                <CTableBody>
+                      <CTableHead color="light">
+                        <CTableRow>
+                          <CTableHeaderCell className="text-center">
+                            <CIcon icon={cilPeople} />
+                          </CTableHeaderCell>
+                          <CTableHeaderCell >Project Name</CTableHeaderCell>
+                          <CTableHeaderCell >Owner</CTableHeaderCell>
+                          <CTableHeaderCell >Progress</CTableHeaderCell>
+                          <CTableHeaderCell className="text-center">Language</CTableHeaderCell>
+                          <CTableHeaderCell className="text-center">Files</CTableHeaderCell>
+                          <CTableHeaderCell className="text-center">Last update</CTableHeaderCell>
+                          <CTableHeaderCell className="text-center">Action</CTableHeaderCell>
+                        </CTableRow>
+                      </CTableHead>
+                      <CTableBody>
 
                         {projectData.map((item, index) => (
-                    <CTableRow v-for="item in tableItems" key={index}>
-                      <CTableDataCell className="text-center">
-                        <CAvatar size="lg" src={item.image} status={convertStatusProject(item.status)} />
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="small text-medium-emphasis">
-                          <Link to={`/project/detail/${item.slug}`}>
-                            <strong className='cursor-pointer project-name'>{item.projectName}</strong>
-                          </Link>
-                        </div>
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="small text-medium-emphasis">
-                          <strong className='cursor-pointer'>{item.owner.name}</strong>
-                        </div>
-                      </CTableDataCell>
-                      <CTableDataCell>
-                        <div className="clearfix">
-                          <div className="float-start">
-                            <strong>{item.percentComplete}%</strong>
-                          </div>
-                          <div className="float-end">
-                            <strong className="text-medium-emphasis">100%</strong>
-                          </div>
-                        </div>
-                        <CProgress thin color={convertStatusProject(item.status)} value={item.percentComplete} />
-                      </CTableDataCell>
+                          <CTableRow v-for="item in tableItems" key={index}>
+                            <CTableDataCell className="text-center">
+                              <CAvatar size="lg" src={item.image} status={convertStatusProject(item.status)} />
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <div className="small text-medium-emphasis">
+                                <Link to={`/project/detail/${item.slug}?tab=0`}>
+                                  <strong className='cursor-pointer project-name'>{item.projectName}</strong>
+                                </Link>
+                              </div>
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <div className="small text-medium-emphasis">
+                                <strong className='cursor-pointer'>{item.owner.name}</strong>
+                              </div>
+                            </CTableDataCell>
+                            <CTableDataCell>
+                              <div className="clearfix">
+                                <div className="float-start">
+                                  <strong>{item.percentComplete}%</strong>
+                                </div>
+                                <div className="float-end">
+                                  <strong className="text-medium-emphasis">100%</strong>
+                                </div>
+                              </div>
+                              <CProgress thin color={convertStatusProject(item.status)} value={item.percentComplete} />
+                            </CTableDataCell>
 
-                      <CTableDataCell className="text-center" style={{ fontSize: 14, fontStyle: 'italic' }}>
-                        {/* <CIcon size="xl" icon={item.flag} title={item.name} /> */}
-                        <div>
-                          {item.sourceLanguage}
-                          <CIcon icon={cilArrowRight} />
-                          {item.targetLanguage}
-                        </div>
-                      </CTableDataCell>
+                            <CTableDataCell className="text-center" style={{ fontSize: 14, fontStyle: 'italic' }}>
+                              {/* <CIcon size="xl" icon={item.flag} title={item.name} /> */}
+                              <div>
+                                {item.sourceLanguage}
+                                <CIcon icon={cilArrowRight} />
+                                {item.targetLanguage}
+                              </div>
+                            </CTableDataCell>
 
-                      <CTableDataCell className="text-center">
-                        <div>{item.files.length}</div>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <div>{moment(item.updatedAt).fromNow()}</div>
-                      </CTableDataCell>
-                      <CTableDataCell className="text-center">
-                        <CIcon icon={cilFolderOpen} className='cursor-pointer' />
-                      </CTableDataCell>
-                    </CTableRow>
-                  ))}
-                </CTableBody>
-              </CTable>
-              <CPagination size="sm" aria-label="Page navigation example" className='float-end mt-4 cursor-pointer' onClick={handleOrderPage}>
-                <CPaginationItem disabled={filters.page == 1 ? true : false} value={filters.page - 1}>Previous</CPaginationItem>
-                {initPaginate(filters.page).map((item, index) =>
-                  <CPaginationItem active={item == filters.page} key={index} value={item}>{item}</CPaginationItem>
-                )}
-                <CPaginationItem disabled={filters.page == totalPages ? true : false} value={filters.page + 1}>Next</CPaginationItem>
-              </CPagination>
+                            <CTableDataCell className="text-center">
+                              <div>{item.files.length}</div>
+                            </CTableDataCell>
+                            <CTableDataCell className="text-center">
+                              <div>{moment(item.updatedAt).fromNow()}</div>
+                            </CTableDataCell>
+                            <CTableDataCell className="text-center">
+                              <CIcon icon={cilFolderOpen} className='cursor-pointer' />
+                            </CTableDataCell>
+                          </CTableRow>
+                        ))}
+                      </CTableBody>
+                    </CTable>
+                    <CPagination size="sm" aria-label="Page navigation example" className='float-end mt-4 cursor-pointer' onClick={handleOrderPage}>
+                      <CPaginationItem disabled={filters.page == 1 ? true : false} value={filters.page - 1}>Previous</CPaginationItem>
+                      {initPaginate(filters.page).map((item, index) =>
+                        <CPaginationItem active={item == filters.page} key={index} value={item}>{item}</CPaginationItem>
+                      )}
+                      <CPaginationItem disabled={filters.page == totalPages ? true : false} value={filters.page + 1}>Next</CPaginationItem>
+                    </CPagination>
                   </>
               }
 

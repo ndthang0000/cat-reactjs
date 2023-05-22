@@ -79,7 +79,6 @@ function CreateProject({ setActiveStep, setNewProject }) {
       projectName
     }
     if (!body.projectName) {
-      console.log('vo day koo ')
       return toast.error('Project name is required', { autoClose: 3000 })
     }
     if (!body.sourceLanguage) {

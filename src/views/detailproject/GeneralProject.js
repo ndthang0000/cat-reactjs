@@ -149,7 +149,6 @@ function GeneralProject({ project, handleChangeTab, setFetchNew }) {
 
   const handleSetScope = () => {
     if (!isViewPortEdit) {
-      console.log('vô nè')
       return
     }
     setScope(state => !state)

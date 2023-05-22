@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { createRef, useEffect, useRef, useState } from 'react'
 import Paper from '@mui/material/Paper'
 import { styled } from '@mui/material/styles'
 import Grid2 from '@mui/material/Unstable_Grid2'
@@ -23,9 +23,13 @@ import EditIcon from '@mui/icons-material/Edit';
 import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { Box, Button, FormControl, InputLabel, Menu, MenuItem, Pagination, Select, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, FormControl, FormControlLabel, FormLabel, InputLabel, Menu, MenuItem, Modal, Pagination, Radio, RadioGroup, Select, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
+import MachineTranslating from './MachineTranslating'
+import GTranslateIcon from '@mui/icons-material/GTranslate';
+
+import ContentEditable from 'react-contenteditable'
 
 const actions = [
   { icon: <FileCopyIcon />, name: 'Copy' },
@@ -33,6 +37,16 @@ const actions = [
   { icon: <PrintIcon />, name: 'Print' },
   { icon: <ShareIcon />, name: 'Share' },
 ];
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  boxShadow: 24,
+  p: 4,
+}
 
 const Translating = () => {
   const location = useLocation().pathname
@@ -45,10 +59,12 @@ const Translating = () => {
 
   const [tm, setTm] = useState(null)
   const [openSelectTM, setOpenSelectTm] = useState(false);
-  const [rowChoose, setRowChoose] = useState(1);
-  const [machineSuggest, setMachineSuggest] = useState('')
+  const [rowChoose, setRowChoose] = useState(0);
   const [dictionarySuggest, setDictionarySuggest] = useState([])
   const [fuzzyMatching, setFuzzyMatching] = useState([])
+  const [fetchNew, setFetchNew] = useState(false)
+  const [isOpenModalMachine, setIsOpenModalMachine] = useState(false)
+  const [optionMachine, setOptionMachine] = useState(null)
 
   const [filters, setFilters] = useState({
     limit: 6,
@@ -59,12 +75,47 @@ const Translating = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [totalResults, setTotalResults] = useState(0)
 
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  const itemsRef = useRef([]);
+
+
+  const dispatch = useDispatch()
+
+  const handleApplySettingMachine = async () => {
+    try {
+      if (!optionMachine) {
+        return toast.error('Please choose one option below')
+      }
+      dispatch({ type: 'set-backdrop' })
+      const data = await axiosInstance.post('/translate/apply-machine-for-all-sentence',
+        {
+          projectId: project.id,
+          fileId,
+          optionMachine
+        }
+      )
+      if (data.data.status) {
+        setFetchNew(state => !state)
+      }
+      dispatch({ type: 'set-backdrop' })
+    }
+    catch (err) {
+      dispatch({ type: 'set-backdrop' })
+    }
+  }
 
   const handleOpenFilterStatus = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const handleApplyCopyTarget = (data) => {
+    const index = sentences.findIndex((item) => item.index == rowChoose)
+    itemsRef.current[index].textContent = data
+    sentences[index].textTarget = data
+    sentences[index].isEdit = true
+  }
 
   const handleCloseSelectStatus = (e) => {
     if (e.target.getAttribute('value') != null) {
@@ -74,24 +125,7 @@ const Translating = () => {
     setAnchorEl(null);
   };
 
-  const dispatch = useDispatch()
 
-  const fetchMachineTranslate = async () => {
-    try {
-      const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
-      const data = await axiosInstance.post('/translate/machine-translate/sentence',
-        {
-          sentence: dataSentence,
-          target: project.targetLanguage
-        }
-      )
-      if (data.data.status) {
-        setMachineSuggest(data.data.data)
-      }
-    } catch (err) {
-
-    }
-  }
 
   const fetchFuzzyMatching = async () => {
     try {
@@ -104,6 +138,7 @@ const Translating = () => {
 
     }
   }
+
 
   useEffect(() => {
     const fetchSentences = async () => {
@@ -134,12 +169,22 @@ const Translating = () => {
       }
     }
     fetchSentences()
-  }, [filters])
+  }, [filters, fetchNew])
 
   useEffect(() => {
-    fetchMachineTranslate()
+    //fetchMachineTranslate()
     fetchFuzzyMatching()
   }, [rowChoose])
+
+  useEffect(() => {
+    itemsRef.current = itemsRef.current.slice(0, sentences.length);
+  }, [sentences]);
+
+  const handleChangeTarget = (e) => {
+    const index = sentences.findIndex((item) => item.index == rowChoose)
+    sentences[index].textTarget = e.target.value
+    sentences[index].isEdit = true
+  }
 
   const handleTranslate = async (source) => {
     const response = await axiosElastic.post('/test_cat.transmems/_search', {
@@ -151,7 +196,6 @@ const Translating = () => {
     })
 
     const data = response.data.hits.hits.length >= 3 ? response.data.hits.hits.slice(0, 3) : response.data.hits.hits
-    console.log('type', data)
     setFuzzies(data)
   }
 
@@ -233,7 +277,7 @@ const Translating = () => {
       <Grid2>
         <Paper sx={{ mb: 2, padding: 2 }} elevation={2}>
           <Box sx={{ justifyContent: 'space-between', display: 'flex' }}>
-            <Tooltip title="TM is Translation memory. Help ......" placement="top-start">
+            {/* <Tooltip title="TM is Translation memory. Help ......" placement="top-start">
               <FormControl sx={{ minWidth: 200 }}>
                 <InputLabel id="demo-simple-select-label">Translation Memory</InputLabel>
                 <Select
@@ -252,7 +296,15 @@ const Translating = () => {
                   <MenuItem value={30}>TM3</MenuItem>
                 </Select>
               </FormControl>
-            </Tooltip>
+            </Tooltip> */}
+            <div style={{ display: 'flex' }}>
+              <Tooltip title="Setting machine translating">
+                <div className='tool-translate' onClick={() => setIsOpenModalMachine(true)}>
+                  <GTranslateIcon />
+
+                </div>
+              </Tooltip>
+            </div>
             <Button variant="outlined" color="error" startIcon={<DownloadIcon />}>
               Download file Target
             </Button>
@@ -292,9 +344,9 @@ const Translating = () => {
                 <TableBody>
                   {sentences.map((row, index) => (
                     <TableRow
-                      key={row.name}
+                      key={index}
                       //sx={{ backgroundColor: row.index == rowChoose ? 'green' : 'inherit' }}
-                      className={row.index == rowChoose && 'choose-row-current'}
+                      className={row.index != rowChoose || 'choose-row-current'}
                       value={row.index}
                       onClick={handleChooseRow}
                     >
@@ -302,7 +354,33 @@ const Translating = () => {
                       <TableCell component="th" scope="row" width='40%'>
                         {row.textSrc}
                       </TableCell>
-                      <TableCell align="left" width='40%'>{row.textTarget || '___'}</TableCell>
+                      <TableCell align="left" width='40%' sx={{ padding: 0 }}>
+                        {/* <input className='input-translate' type='text' /> */}
+                        {/* {row.textTarget || <span style={{ color: '#afb3af', fontStyle: 'italic' }}>Untranslated</span>} */}
+                        {/* <div
+                          className='div-translate'
+                          style={{
+                            height: '100%',
+                            width: '100%',
+                            paddingInline: 4,
+                            paddingBlock: 10
+                          }}
+                          ref={el => itemsRef.current[index] = el}
+                          onClick={handleEditTarget}
+                          contentEditable={true}
+                        >{row.textTarget}</div> */}
+                        {/* <textarea className='input-translate' value={row.textTarget}>
+                        </textarea> */}
+                        <ContentEditable
+                          innerRef={el => itemsRef.current[index] = el}
+                          html={row.textTarget || ''}
+                          onChange={handleChangeTarget}
+                          style={{
+                            paddingInline: 10,
+                            paddingBlock: 4
+                          }}
+                        />
+                      </TableCell>
                       <TableCell align="left" >
                         <Tooltip title={convertStatusSentenceToSquareColor(row.status).tittle}>
                           <Box
@@ -350,9 +428,15 @@ const Translating = () => {
         <Grid2 xs={12} lg={4} container>
           <Grid2 lg={12} xs={4} sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}>
             <Typography variant='h6' color='black'>Machine Translate:</Typography>
-            <Paper variant='outline' elevation={2} >
-              {machineSuggest}
-            </Paper >
+            <MachineTranslating
+              rowChoose={rowChoose}
+              sentences={sentences}
+              target={project?.targetLanguage}
+              projectId={project?.id}
+              fileId={fileId}
+              setFetchNew={setFetchNew}
+              handleApplyCopyTarget={handleApplyCopyTarget}
+            />
           </Grid2>
           <Grid2
             lg={12}
@@ -407,6 +491,42 @@ const Translating = () => {
           ))}
         </SpeedDial>
       </Box>
+
+      <Modal // Model setting machine translate
+        open={isOpenModalMachine}
+        onClose={() => setIsOpenModalMachine(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Paper sx={style}>
+          <Typography variant="h6" className="mb-4">
+            Setting for Machine Translate
+          </Typography>
+          <Alert severity="info">We using Machine of GoogleTranslate </Alert>
+          <FormControl>
+            <FormLabel id="demo-controlled-radio-buttons-group">Options</FormLabel>
+            <RadioGroup
+              aria-labelledby="demo-controlled-radio-buttons-group"
+              name="controlled-radio-buttons-group"
+              value={optionMachine}
+              onChange={(e) => setOptionMachine(e.target.value)}
+            >
+              <FormControlLabel value="1" control={<Radio />} label="Apply for sentence un_translate and Confirm All" />
+              <FormControlLabel value="2" control={<Radio />} label="Apply for sentence un_translate and set Translating" />
+            </RadioGroup>
+          </FormControl>
+
+          <Stack direction="row" justifyContent="end">
+            <Button variant="outlined" onClick={() => setIsOpenModalMachine(false)}>
+              Cancel
+            </Button>
+            <Button variant="contained" className="ms-2" onClick={handleApplySettingMachine}>
+              Apply
+            </Button>
+          </Stack>
+        </Paper>
+      </Modal>
+
     </>
   )
 }

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import queryString from 'query-string'
 
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 
 import axiosInstance from '../../axios'
 
-import { useSelector, useDispatch } from 'react-redux'
 
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
@@ -14,7 +13,6 @@ import Box from '@mui/material/Box'
 import Overview from './OverviewProject'
 import Member from './MemberProject'
 import Activity from './ActivityProject'
-import Translating from './Translating'
 import GeneralProject from './GeneralProject'
 
 function TabPanel(props) {
@@ -47,13 +45,15 @@ function a11yProps(index) {
 const DetailProject = () => {
   const params = useLocation().pathname.split('/')
   const lastParam = params[params.length - 1]
+  const searchData = queryString.parse(useLocation().search)
   const [project, setProject] = useState({})
   const [fetchNew, setFetchNew] = useState(false)
   const [fileIsTranslating, setFileIsTranslating] = useState('')
 
+  console.log(searchData?.tab)
 
-  const [value, setValue] = useState(0);
-
+  const [value, setValue] = useState(Number(searchData?.tab) || 0);
+  console.log(value)
   const handleChangeTab = (event, newValue) => {
     setValue(newValue)
   }
@@ -62,7 +62,6 @@ const DetailProject = () => {
     const getDetailProject = async () => {
       try {
         const data = await axiosInstance.get(`/project/detail/${lastParam}`)
-        console.log({ data })
         if (data.data.status) {
           setProject(data.data.data)
         }
@@ -102,8 +101,8 @@ const DetailProject = () => {
         <TabPanel value={value} index={2}>
           <Member project={project} setFetchNew={setFetchNew} />
         </TabPanel>
-        <TabPanel value={value} index={3}>
-          <Activity project={project} />
+        <TabPanel value={value}>
+          <Activity project={project} index={3} />
         </TabPanel>
       </Box>
     </>
