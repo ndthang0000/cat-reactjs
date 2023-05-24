@@ -113,7 +113,6 @@ const Dashboard = () => {
     try {
       dispatch({ type: 'set-backdrop' })
       const data = await axiosInstance.get(`/project?${queryString.stringify(filters)}`)
-      console.log({ project: data })
       dispatch({ type: 'set-backdrop' })
       if (data.status == 200) {
         setProjectData(data.data.results)

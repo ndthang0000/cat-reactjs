@@ -4,7 +4,7 @@ import axiosInstance from '../../axios'
 
 
 
-function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, setFetchNew, handleApplyCopyTarget }) {
+function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, setFetchNew, handleApplyCopyTarget, handleApplyTranslateTarget }) {
   const [machineSuggest, setMachineSuggest] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -12,13 +12,17 @@ function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, s
     handleApplyCopyTarget(machineSuggest)
   }
 
-  const getDataSentence = () => {
+  const getCurrentDataSentence = () => {
     return sentences.find(item => item.index == rowChoose) || {}
   }
 
   const fetchMachineTranslate = async () => {
+    if (getCurrentDataSentence().machineTranslate) {
+      setMachineSuggest(getCurrentDataSentence().machineTranslate)
+      return
+    }
     try {
-      const dataSentence = getDataSentence().textSrc
+      const dataSentence = getCurrentDataSentence().textSrc
       if (!dataSentence) return
       setLoading(true)
       const data = await axiosInstance.post('/translate/machine-translate/sentence',
@@ -29,6 +33,7 @@ function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, s
       )
       setLoading(false)
       if (data.data.status) {
+        getCurrentDataSentence().machineTranslate = data.data.data
         setMachineSuggest(data.data.data)
       }
     } catch (err) {
@@ -43,10 +48,11 @@ function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, s
         {
           projectId,
           fileId,
-          sentenceId: getDataSentence()?.id
+          sentenceId: getCurrentDataSentence()?.id
         }
       )
-      setFetchNew(state => !state)
+      //setFetchNew(state => !state)
+      handleApplyTranslateTarget(data.data.data)
       setLoading(false)
     } catch (error) {
       setLoading(false)
@@ -65,7 +71,7 @@ function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, s
         <div>
           <span>{machineSuggest}</span>
           {
-            getDataSentence().status == 'TRANSLATING' ||
+            getCurrentDataSentence().status == 'TRANSLATING' ||
             <div style={{ display: 'flex' }}>
               {/* <Box
                 sx={{

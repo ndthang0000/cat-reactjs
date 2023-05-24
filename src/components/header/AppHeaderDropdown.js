@@ -32,6 +32,7 @@ const AppHeaderDropdown = () => {
   const handleLogout = () => {
     dispatch({ type: 'logout' })
     localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
   }
   return (
     <CDropdown variant="nav-item">

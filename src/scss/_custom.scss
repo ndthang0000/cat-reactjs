@@ -1,4 +1,8 @@
 // Here you can add other styles
+@import "variables";
+
+$cui-sidebar-width2:256px;
+
 .cursor-pointer{
   cursor: pointer;
 }
@@ -115,4 +119,19 @@
   background-color: rgba(178, 172, 175, 0.5);
   border-radius: 5px;
   margin-left: 2px;
+}
+
+.sticky-footer{
+  position: sticky;
+  height: 50px;
+  bottom:0;
+  width: 100%;
+  left: --cui-sidebar-width2;
+  padding: 15px;
+}
+
+.sticky-footer-container{
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
 }

@@ -13,6 +13,27 @@ const convertStatus2Toast = (status) => {
   }
 }
 
+const refreshAccessToken = async () => {
+  try {
+    console.log('refreshToken', localStorage.getItem('refreshToken'))
+    const data = await axios.post(`${process.env.REACT_APP_DOMAIN}/auth/refresh-tokens`,
+      {
+        refreshToken: localStorage.getItem('refreshToken')
+      }
+    )
+    if (data.data.status) {
+      localStorage.setItem('refreshToken', data.data.refresh.token)
+      localStorage.setItem('token', data.data.access.token)
+    }
+    return data.data.refresh.token
+  } catch (error) {
+    // localStorage.removeItem('refreshToken')
+    // localStorage.removeItem('token')
+    return null
+  }
+
+}
+
 const instance = axios.create({
   baseURL: process.env.REACT_APP_DOMAIN,
 });
@@ -29,9 +50,14 @@ instance.interceptors.response.use(function (response) {
   }
   return response
 },
-  function (err) {
-    if (err.response.status == 401) {
-      toast[convertStatus2Toast(null)]('Please login to continue use system')
+  async function (err) {
+    const originalRequest = err.config;
+    if (err.response.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      const access_token = await refreshAccessToken();
+      axios.defaults.headers.common['Authorization'] = 'Bearer ' + access_token;
+      return instance(originalRequest);
+      //toast[convertStatus2Toast(null)]('Please login to continue use system')
     }
     else if (err.response.data.message) {
       toast[convertStatus2Toast(false)](err.response.data.message)

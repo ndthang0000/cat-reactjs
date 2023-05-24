@@ -39,8 +39,10 @@ const Login = () => {
     }
     try {
       const data = await axiosInstance.post(`/auth/login`, body)
+      console.log(data)
       if (data.status == 200) {
         localStorage.setItem('token', data.data.tokens.access.token)
+        localStorage.setItem('refreshToken', data.data.tokens.refresh.token)
         toast.success('Login Successfully', { autoClose: 3000 })
         navigate('/project')
         dispatch({ type: 'login', userInformation: data.data.user })

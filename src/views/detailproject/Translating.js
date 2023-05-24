@@ -10,7 +10,6 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 
-import SendIcon from '@mui/icons-material/Send';
 import DownloadIcon from '@mui/icons-material/Download';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
@@ -49,6 +48,9 @@ const style = {
 }
 
 const Translating = () => {
+
+  console.log('Re-render')
+
   const location = useLocation().pathname
   const pathName = location.split('/')
   const fileId = pathName[pathName.length - 1]
@@ -63,8 +65,10 @@ const Translating = () => {
   const [dictionarySuggest, setDictionarySuggest] = useState([])
   const [fuzzyMatching, setFuzzyMatching] = useState([])
   const [fetchNew, setFetchNew] = useState(false)
+  const [fetchTempNew, setFetchTempNew] = useState(false)
   const [isOpenModalMachine, setIsOpenModalMachine] = useState(false)
   const [optionMachine, setOptionMachine] = useState(null)
+  const [statisticFile, setStatisticFile] = useState([])
 
   const [filters, setFilters] = useState({
     limit: 6,
@@ -83,12 +87,45 @@ const Translating = () => {
 
   const dispatch = useDispatch()
 
+  const handleConfirmSentence = async (e) => {
+    try {
+      setIsOpenModalMachine(false)
+
+      const splitButton = e.target.value.split('***')
+      const sentenceId = splitButton[0]
+      const indexArraySentence = Number(splitButton[1])
+      const indexSentence = Number(splitButton[2])
+
+      dispatch({ type: 'set-backdrop' })
+      const data = await axiosInstance.post('/translate/confirm-sentence',
+        {
+          projectId: project.id,
+          fileId,
+          sentenceId,
+          data: itemsRef.current[indexArraySentence].textContent
+        }
+      )
+
+      dispatch({ type: 'set-backdrop' })
+      if (data.data.status) {
+        sentences[indexArraySentence].status = 'CONFIRM'
+        sentences[indexArraySentence].textTarget = itemsRef.current[indexArraySentence].textContent
+        setFetchTempNew(state => !state)
+        //setSentences(state => state.map(item => { return { ...item } }))
+      }
+    }
+    catch (err) {
+      dispatch({ type: 'set-backdrop' })
+    }
+  }
+
   const handleApplySettingMachine = async () => {
     try {
       if (!optionMachine) {
         return toast.error('Please choose one option below')
       }
       dispatch({ type: 'set-backdrop' })
+      setIsOpenModalMachine(false)
       const data = await axiosInstance.post('/translate/apply-machine-for-all-sentence',
         {
           projectId: project.id,
@@ -112,9 +149,26 @@ const Translating = () => {
 
   const handleApplyCopyTarget = (data) => {
     const index = sentences.findIndex((item) => item.index == rowChoose)
+    if (index == -1) {
+      return
+    }
     itemsRef.current[index].textContent = data
     sentences[index].textTarget = data
-    sentences[index].isEdit = true
+    sentences[index].status = 'DRAFT'
+    setFetchTempNew(state => !state)
+    //setSentences(state => [...state])
+  }
+
+  const handleApplyTranslateTarget = (data) => {
+    const index = sentences.findIndex((item) => item.index == rowChoose)
+    if (index == -1) {
+      return
+    }
+    itemsRef.current[index].textContent = data
+    sentences[index].textTarget = data
+    sentences[index].status = 'CONFIRM'
+    setFetchTempNew(state => !state)
+    // setSentences(state => [...state])
   }
 
   const handleCloseSelectStatus = (e) => {
@@ -152,27 +206,47 @@ const Translating = () => {
           `/project/open-file-of-project?${queryString.stringify(filters)}`,
           body,
         )
-        dispatch({ type: 'set-backdrop' })
+
         if (!data.data.status) {
           return
         }
+        dispatch({ type: 'set-backdrop' })
         localStorage.setItem('recent-translate', location)
         setSentences(data.data.data.results)
         setProject(data.data.project)
-        if (data.data.data.results.length > 0) {
-          setRowChoose(data.data.data.results[0].index)
-        }
         setTotalPages(data.data.data.totalPages)
         setTotalResults(data.data.data.totalResults)
+
+        if (data.data.data.results.findIndex(item => item.index == rowChoose) == -1 && data.data.data.results.length > 0) {
+          setRowChoose(data.data.data.results[0].index)
+        }
+      } catch (err) {
+        dispatch({ type: 'set-backdrop' })
+      }
+    }
+    const fetchStatistic = async () => {
+      const body = {
+        fileId: fileId,
+      }
+      try {
+        const data = await axiosInstance.post(
+          `/translate/statistic-file`,
+          body,
+        )
+
+        if (!data.data.status) {
+          return
+        }
+        setStatisticFile(data.data.data)
       } catch (err) {
         dispatch({ type: 'set-backdrop' })
       }
     }
     fetchSentences()
+    fetchStatistic()
   }, [filters, fetchNew])
 
   useEffect(() => {
-    //fetchMachineTranslate()
     fetchFuzzyMatching()
   }, [rowChoose])
 
@@ -183,7 +257,9 @@ const Translating = () => {
   const handleChangeTarget = (e) => {
     const index = sentences.findIndex((item) => item.index == rowChoose)
     sentences[index].textTarget = e.target.value
-    sentences[index].isEdit = true
+    sentences[index].status = 'DRAFT'
+    setFetchTempNew(state => !state)
+    //setSentences(state => state.map(item => { return { ...item } }))
   }
 
   const handleTranslate = async (source) => {
@@ -243,7 +319,12 @@ const Translating = () => {
       {
         status: 'CONFIRM',
         tittle: 'Confirm',
-        color: '#07f01b'
+        color: '#09ab1e'
+      },
+      {
+        status: 'DRAFT',
+        tittle: 'Draft',
+        color: '#b27ecf'
       },
     ]
   }
@@ -272,7 +353,7 @@ const Translating = () => {
         }}
       >
         <MenuItem key={-1} onClick={handleCloseSelectStatus} sx={{ color: 'black' }} value={'null'}>All</MenuItem>
-        {getStatusSentence().map((item, index) => <MenuItem key={index} value={item.status} onClick={handleCloseSelectStatus} sx={{ color: item.color }}>{item.tittle}</MenuItem>)}
+        {getStatusSentence().filter(item => item.tittle != 'Draft').map((item, index) => <MenuItem key={index} value={item.status} onClick={handleCloseSelectStatus} sx={{ color: item.color }}>{item.tittle}</MenuItem>)}
       </Menu>
       <Grid2>
         <Paper sx={{ mb: 2, padding: 2 }} elevation={2}>
@@ -297,7 +378,8 @@ const Translating = () => {
                 </Select>
               </FormControl>
             </Tooltip> */}
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: 10, fontWeight: 550 }}>Tool: </span>
               <Tooltip title="Setting machine translating">
                 <div className='tool-translate' onClick={() => setIsOpenModalMachine(true)}>
                   <GTranslateIcon />
@@ -325,17 +407,19 @@ const Translating = () => {
                 scrollbarColor: 'green',
               }}
             >
-              <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+              <Table stickyHeader sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                 <TableHead>
                   <TableRow>
                     <TableCell width='20'>STT </TableCell>
                     <TableCell>Source ({project?.sourceLanguage}) </TableCell>
                     <TableCell align="left">Target ({project?.targetLanguage}) </TableCell>
-                    <TableCell align="left" sx={{ display: 'flex' }}>
-                      <div>Status</div>
-                      <div>
-                        <FilterAltIcon onClick={handleOpenFilterStatus} sx={{ color: convertStatusSentenceToSquareColor(filters.status).color }} />
+                    <TableCell align="left" >
+                      <div style={{ display: 'flex' }}>
+                        <div>Status</div>
+                        <div>
+                          <FilterAltIcon onClick={handleOpenFilterStatus} sx={{ color: convertStatusSentenceToSquareColor(filters.status).color }} />
 
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell align="left">Action</TableCell>
@@ -377,7 +461,8 @@ const Translating = () => {
                           onChange={handleChangeTarget}
                           style={{
                             paddingInline: 10,
-                            paddingBlock: 4
+                            paddingBlock: 4,
+                            color: convertStatusSentenceToSquareColor(row.status).color
                           }}
                         />
                       </TableCell>
@@ -394,7 +479,16 @@ const Translating = () => {
                           ></Box>
                         </Tooltip>
                       </TableCell>
-                      <TableCell align="left">Confirm</TableCell>
+                      <TableCell align="left">
+                        {
+                          row.status == 'CONFIRM'
+                          ||
+                          <Button variant="contained" color="success" size='small' onClick={handleConfirmSentence} value={row.id + '***' + index + '***' + row.index} >
+                            Confirm
+                          </Button>
+                        }
+
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody >
@@ -420,8 +514,31 @@ const Translating = () => {
                   </Select>
                 </FormControl>
               </Box>
-              <div style={{ fontSize: 12, fontWeight: 450, color: '#5c5e5d' }}>Have <span style={{ fontWeight: 600, fontStyle: 'italic' }}>{totalResults}</span> sentence in this file</div>
+              <div style={{ fontSize: 12, fontWeight: 450, color: '#5c5e5d' }}>Have <span style={{ fontWeight: 600, fontStyle: 'italic' }}>{totalResults}</span> sentence in this workspace</div>
               <Pagination count={totalPages} color="primary" onChange={handlePaginate} page={filters.page} />
+            </Paper>
+            <Paper className='sticky-footer' elevation={5}>
+              <div className='sticky-footer-container'>
+                {statisticFile.map(item =>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 450,
+                      color: '#5c5e5d',
+                      textAlign: 'center',
+                      paddingInline: 15,
+                      paddingBlock: 10,
+                      backgroundColor: 'rgba(160, 216, 162, 0.2)'
+                    }}>
+                    {item.status}:
+                    <span style={{ fontWeight: 600, fontStyle: 'italic' }}>
+                      {' ' + item.count + ' '}
+                    </span>
+                    sentence
+                  </div>)}
+
+              </div>
+
             </Paper>
           </Paper>
         </Grid2 >
@@ -436,6 +553,7 @@ const Translating = () => {
               fileId={fileId}
               setFetchNew={setFetchNew}
               handleApplyCopyTarget={handleApplyCopyTarget}
+              handleApplyTranslateTarget={handleApplyTranslateTarget}
             />
           </Grid2>
           <Grid2
