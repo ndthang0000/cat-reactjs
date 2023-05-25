@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify'
 import axiosInstance from '../../axios'
+import moment from 'moment'
 
 const style = {
   position: 'absolute',
@@ -155,6 +156,7 @@ const Member = ({ project, setFetchNew }) => {
             </CTableHeaderCell>
             <CTableHeaderCell>Name</CTableHeaderCell>
             <CTableHeaderCell>Role</CTableHeaderCell>
+            <CTableHeaderCell>Time Join</CTableHeaderCell>
             {hasRole() ? <CTableHeaderCell className="text-center">Action</CTableHeaderCell> : <></>}
           </CTableRow>
         </CTableHead>
@@ -170,6 +172,7 @@ const Member = ({ project, setFetchNew }) => {
                   <div className="small text-medium-emphasis">{item.userId.name}</div>
                 </CTableDataCell>
                 <CTableDataCell>{item.role}</CTableDataCell>
+                <CTableDataCell>{moment(item.timeJoin).format('LLL')}</CTableDataCell>
                 {hasRole() ? <CTableDataCell className="text-center">
                   <CIcon icon={cilTrash} className="cursor-pointer" onClick={() => handleRemoveMember(item._id)} />
                 </CTableDataCell> : <></>}
