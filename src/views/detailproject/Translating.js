@@ -147,6 +147,24 @@ const Translating = () => {
     setAnchorEl(event.currentTarget);
   };
 
+  const handleDownloadFile = async () => {
+    try {
+      dispatch({ type: 'set-backdrop' })
+      const data = await axiosInstance.post('/project/export-file', {
+        projectId: project.id,
+        fileId
+      })
+      dispatch({ type: 'set-backdrop' })
+      if (data.data.status) {
+        const link = document.createElement('a');
+        link.href = data.data.data;
+        link.click();
+      }
+    } catch (error) {
+      dispatch({ type: 'set-backdrop' })
+    }
+  }
+
   const handleApplyCopyTarget = (data) => {
     const index = sentences.findIndex((item) => item.index == rowChoose)
     if (index == -1) {
@@ -387,7 +405,7 @@ const Translating = () => {
                 </div>
               </Tooltip>
             </div>
-            <Button variant="outlined" color="error" startIcon={<DownloadIcon />}>
+            <Button variant="outlined" color="error" startIcon={<DownloadIcon />} onClick={handleDownloadFile}>
               Download file Target
             </Button>
           </Box>
