@@ -17,7 +17,6 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { toast } from 'react-toastify'
 import axiosInstance from '../../axios'
 
 const style = {
@@ -32,7 +31,7 @@ const style = {
 
 const Member = ({ project, setFetchNew }) => {
   const userInformation = useSelector((state) => state.userInformation)
-  
+
   const [roleConfig, setRoleConfig] = useState([])
   const [role, setRole] = useState('')
   const [email, setEmail] = useState('')
@@ -52,7 +51,6 @@ const Member = ({ project, setFetchNew }) => {
       dispatch({ type: 'set-backdrop' })
       if (response.data.status) {
         setFetchNew(state => !state)
-        // toast.success("Remove member successfully", { autoClose: 3000 })
       }
     }
     catch (err) {
@@ -92,9 +90,7 @@ const Member = ({ project, setFetchNew }) => {
     try {
       const data = await axiosInstance.get('/project/get-role-of-project')
       setRoleConfig(data.data.data)
-    } catch (error) {
-
-    }
+    } catch (error) {}
   }
 
   useEffect(() => {
@@ -113,7 +109,8 @@ const Member = ({ project, setFetchNew }) => {
 
   return (
     <Paper elevation={6} sx={{ padding: 3 }}>
-      {hasRole() ? <Stack direction="row" alignItems="center" spacing={2}>
+      {hasRole() ?
+      <Stack direction="row" alignItems="center" spacing={2}>
         <Button variant="contained" className="mb-4" onClick={handleOpen}>
           Add member
         </Button>
@@ -145,7 +142,10 @@ const Member = ({ project, setFetchNew }) => {
             </Stack>
           </Paper>
         </Modal>
-      </Stack> : <></>}
+      </Stack> :
+      <Button variant="contained" className="mb-4" onClick={() => handleRemoveMember(userInformation.id)}>
+        Leave project
+      </Button>}
 
       <CTable align="middle" className="mb-0 border" hover responsive>
         <CTableHead color="light">
@@ -155,6 +155,7 @@ const Member = ({ project, setFetchNew }) => {
             </CTableHeaderCell>
             <CTableHeaderCell>Name</CTableHeaderCell>
             <CTableHeaderCell>Role</CTableHeaderCell>
+            <CTableHeaderCell>Time Join</CTableHeaderCell>
             {hasRole() ? <CTableHeaderCell className="text-center">Action</CTableHeaderCell> : <></>}
           </CTableRow>
         </CTableHead>
@@ -170,8 +171,9 @@ const Member = ({ project, setFetchNew }) => {
                   <div className="small text-medium-emphasis">{item.userId.name}</div>
                 </CTableDataCell>
                 <CTableDataCell>{item.role}</CTableDataCell>
+                <CTableDataCell>{new Date(item.timeJoin).toUTCString()}</CTableDataCell>
                 {hasRole() ? <CTableDataCell className="text-center">
-                  <CIcon icon={cilTrash} className="cursor-pointer" onClick={() => handleRemoveMember(item._id)} />
+                  <CIcon icon={cilTrash} className={item.role === 'OWNER' ? "d-none" : "cursor-pointer"} onClick={() => handleRemoveMember(item._id)} />
                 </CTableDataCell> : <></>}
               </CTableRow>
             ))}
