@@ -17,7 +17,6 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { toast } from 'react-toastify'
 import axiosInstance from '../../axios'
 import moment from 'moment'
 
@@ -33,7 +32,7 @@ const style = {
 
 const Member = ({ project, setFetchNew }) => {
   const userInformation = useSelector((state) => state.userInformation)
-  
+
   const [roleConfig, setRoleConfig] = useState([])
   const [role, setRole] = useState('')
   const [email, setEmail] = useState('')
@@ -53,7 +52,6 @@ const Member = ({ project, setFetchNew }) => {
       dispatch({ type: 'set-backdrop' })
       if (response.data.status) {
         setFetchNew(state => !state)
-        // toast.success("Remove member successfully", { autoClose: 3000 })
       }
     }
     catch (err) {
@@ -93,9 +91,7 @@ const Member = ({ project, setFetchNew }) => {
     try {
       const data = await axiosInstance.get('/project/get-role-of-project')
       setRoleConfig(data.data.data)
-    } catch (error) {
-
-    }
+    } catch (error) { }
   }
 
   useEffect(() => {
@@ -114,39 +110,43 @@ const Member = ({ project, setFetchNew }) => {
 
   return (
     <Paper elevation={6} sx={{ padding: 3 }}>
-      {hasRole() ? <Stack direction="row" alignItems="center" spacing={2}>
-        <Button variant="contained" className="mb-4" onClick={handleOpen}>
-          Add member
-        </Button>
-        <Modal
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <Paper sx={style}>
-            <Typography variant="h6" className="mb-4">
-              Add new member to your project
-            </Typography>
-            <TextField size="small" label="Email" variant="outlined" className="m-0 w-100 mb-3" onChange={(e) =>{setEmail(e.target.value)}} />
-            <FormControl size="small" className="m-0 w-100 mb-3">
-              <InputLabel>Role</InputLabel>
-              <Select value={role} label="Role" onChange={(event) => { setRole(event.target.value) }}>
-                {roleConfig.map((item, index) => <MenuItem value={item} key={index}>{item}</MenuItem>)}
-              </Select>
-            </FormControl>
+      {hasRole() ?
+        <Stack direction="row" alignItems="center" spacing={2}>
+          <Button variant="contained" className="mb-4" onClick={handleOpen}>
+            Add member
+          </Button>
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Paper sx={style}>
+              <Typography variant="h6" className="mb-4">
+                Add new member to your project
+              </Typography>
+              <TextField size="small" label="Email" variant="outlined" className="m-0 w-100 mb-3" onChange={(e) => { setEmail(e.target.value) }} />
+              <FormControl size="small" className="m-0 w-100 mb-3">
+                <InputLabel>Role</InputLabel>
+                <Select value={role} label="Role" onChange={(event) => { setRole(event.target.value) }}>
+                  {roleConfig.map((item, index) => <MenuItem value={item} key={index}>{item}</MenuItem>)}
+                </Select>
+              </FormControl>
 
-            <Stack direction="row" justifyContent="end">
-              <Button variant="outlined" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button variant="contained" className="ms-2" onClick={handleAddMember}>
-                Add
-              </Button>
-            </Stack>
-          </Paper>
-        </Modal>
-      </Stack> : <></>}
+              <Stack direction="row" justifyContent="end">
+                <Button variant="outlined" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button variant="contained" className="ms-2" onClick={handleAddMember}>
+                  Add
+                </Button>
+              </Stack>
+            </Paper>
+          </Modal>
+        </Stack> :
+        <Button variant="contained" className="mb-4" onClick={() => handleRemoveMember(userInformation.id)}>
+          Leave project
+        </Button>}
 
       <CTable align="middle" className="mb-0 border" hover responsive>
         <CTableHead color="light">
@@ -174,7 +174,7 @@ const Member = ({ project, setFetchNew }) => {
                 <CTableDataCell>{item.role}</CTableDataCell>
                 <CTableDataCell>{moment(item.timeJoin).format('LLL')}</CTableDataCell>
                 {hasRole() ? <CTableDataCell className="text-center">
-                  <CIcon icon={cilTrash} className="cursor-pointer" onClick={() => handleRemoveMember(item._id)} />
+                  <CIcon icon={cilTrash} className={item.role === 'OWNER' ? "d-none" : "cursor-pointer"} onClick={() => handleRemoveMember(item._id)} />
                 </CTableDataCell> : <></>}
               </CTableRow>
             ))}
