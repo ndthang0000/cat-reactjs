@@ -64,9 +64,15 @@ function CreateProject({ setActiveStep, setNewProject }) {
   const [scope, setScope] = useState(true)
   const [sourceLanguage, setSourceLanguage] = useState('')
   const [targetLanguage, setTargetLanguage] = useState('')
+  const [tmName, setTmName] = useState('')
+  const [dictName, setDictName] = useState('')
+  const [translationMemory, setTranslationMemory] = useState('')
+  const [dictionary, setDictionary] = useState('')
   const [description, setDescription] = useState('')
   const [projectName, setProjectName] = useState('')
   const [languageConfig, setLanguageConfig] = useState([])
+  const [translationMemoryList, setTranslationMemoryList] = useState([])
+  const [dictionaryList, setDictionaryList] = useState([])
 
   const dispatch = useDispatch()
 
@@ -76,7 +82,11 @@ function CreateProject({ setActiveStep, setNewProject }) {
       sourceLanguage,
       targetLanguage,
       description,
-      projectName
+      projectName,
+      translationMemoryCode: translationMemory.code,
+      isTmReverse: sourceLanguage !== translationMemory.sourceLanguage,
+      dictionaryCode: dictionary.code,
+      isDictReverse: sourceLanguage !== dictionary.sourceLanguage,
     }
     if (!body.projectName) {
       return toast.error('Project name is required', { autoClose: 3000 })
@@ -89,6 +99,12 @@ function CreateProject({ setActiveStep, setNewProject }) {
     }
     if (body.sourceLanguage == body.targetLanguage) {
       return toast.error('Source and target must be different !!')
+    }
+    if (!body.translationMemoryCode) {
+      return toast.error('Please select a Translation Memory')
+    }
+    if (!body.dictionaryCode) {
+      return toast.error('Please select a Dictionary')
     }
     try {
       dispatch({ type: 'set-backdrop' })
@@ -120,6 +136,38 @@ function CreateProject({ setActiveStep, setNewProject }) {
     }
     fetchLanguageConfig()
   }, [])
+
+  const fetchTmAndDict = async () => {
+    try {
+      if (sourceLanguage !== '' && targetLanguage !== '') {
+        const data = await axiosInstance.get(`/auth/get-tm-dict?source=${sourceLanguage}&target=${targetLanguage}`)
+        setTranslationMemoryList(data.data[0])
+        setDictionaryList(data.data[1])
+      }
+    } catch (error) {}
+  }
+
+  useEffect(()=>{
+    fetchTmAndDict()
+  }, [sourceLanguage])
+
+  useEffect(()=>{
+    fetchTmAndDict()
+  }, [targetLanguage])
+
+  const handleAddTm = async () => {
+    try {
+      await axiosInstance.post('/auth/add-tm', { name: tmName, sourceLanguage, targetLanguage })
+      fetchTmAndDict()
+    } catch (error) {}
+  }
+
+  const handleAddDict = async () => {
+    try {
+      await axiosInstance.post('/auth/add-dictionary', { name: dictName, sourceLanguage, targetLanguage })
+      fetchTmAndDict()
+    } catch (error) {}
+  }
 
   return (
     <div>
@@ -166,6 +214,35 @@ function CreateProject({ setActiveStep, setNewProject }) {
             </Select>
           </FormControl>
         </Box>
+
+        <Typography sx={{ mb: 1 }}>
+          Choose Translation Memory:
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <FormControl sx={{ m: 1, minWidth: 280 }}>
+            <InputLabel htmlFor="tm-select">Translation Memory</InputLabel>
+            <Select defaultValue="" id="tm-select" label="Translation Memory">
+              {translationMemoryList.map((item, index) => <MenuItem value={item.code} key={index} onClick={(e) => setTranslationMemory(item)}>{item.name}</MenuItem>)}
+              <input className='mx-2' type="text" placeholder='Input name' value={tmName} onChange={(e) => setTmName(e.target.value)} />
+              <Button variant="text" onClick={handleAddTm}>Create</Button>
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Typography sx={{ mb: 1 }}>
+          Choose Dictionary:
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <FormControl sx={{ m: 1, minWidth: 280 }}>
+            <InputLabel htmlFor="dictionary-select">Dictionary</InputLabel>
+            <Select defaultValue="" id="dictionary-select" label="Dictionary">
+              {dictionaryList.map((item, index) => <MenuItem value={item.code} key={index} onClick={(e) => setDictionary(item)}>{item.name}</MenuItem>)}
+              <input className='mx-2' type="text" placeholder='Input name' value={dictName} onChange={(e) => setDictName(e.target.value)} />
+              <Button variant="text" onClick={handleAddDict}>Create</Button>
+            </Select>
+          </FormControl>
+        </Box>
+
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} size='medium' onClick={handleCreateNewProject}>
             Create new Project

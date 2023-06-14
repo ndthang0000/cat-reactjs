@@ -29,6 +29,7 @@ import MachineTranslating from './MachineTranslating'
 import GTranslateIcon from '@mui/icons-material/GTranslate';
 
 import ContentEditable from 'react-contenteditable'
+import { CTable, CTableBody, CTableDataCell, CTableHead, CTableHeaderCell, CTableRow } from '@coreui/react'
 
 const actions = [
   { icon: <FileCopyIcon />, name: 'Copy' },
@@ -201,8 +202,10 @@ const Translating = () => {
 
   const fetchFuzzyMatching = async () => {
     try {
+      console.log('here')
       const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
-      const data = await axiosInstance.post('/translate/fuzzy-matching', { sentence: dataSentence })
+      const data = await axiosInstance.post('/translate/fuzzy-matching', { sentence: dataSentence, projectId: project.id })
+      console.log('fuzzy', data)
       if (data.data.status) {
         setFuzzyMatching(data.data.data)
       }
@@ -595,9 +598,29 @@ const Translating = () => {
               Fuzzy Match:
             </Typography>
 
-            <Paper variant='outline' elevation={2} >
-              {fuzzyMatching.map((item, index) => <Typography key={index} variant='subtitle1'>{item}</Typography>)}
-            </Paper >
+            <Paper variant="outline" elevation={2}>
+              <CTable align="middle" className="mb-0 border" hover responsive>
+                <CTableHead color="light">
+                  <CTableRow>
+                    <CTableHeaderCell className="text-center">#</CTableHeaderCell>
+                    <CTableHeaderCell>Source</CTableHeaderCell>
+                    <CTableHeaderCell>Target</CTableHeaderCell>
+                    <CTableHeaderCell>Score</CTableHeaderCell>{' '}
+                  </CTableRow>
+                </CTableHead>
+
+                <CTableBody>
+                  {fuzzyMatching.map((item, index) => (
+                    <CTableRow v-for="item in tableItems" key={index}>
+                      <CTableDataCell className="text-center">{index + 1}</CTableDataCell>
+                      <CTableDataCell>{project.isTmReverse ? item._source.target : item._source.source}</CTableDataCell>
+                      <CTableDataCell>{project.isTmReverse ? item._source.source : item._source.target}</CTableDataCell>
+                      <CTableDataCell>{item._score}</CTableDataCell>
+                    </CTableRow>
+                  ))}
+                </CTableBody>
+              </CTable>
+            </Paper>
           </Grid2 >
         </Grid2 >
         {/* <Grid2 xs={12} lg={4} container spacing={2}>
