@@ -30,6 +30,13 @@ const _nav = [
     component: CNavTitle,
     name: 'Memory',
   },
+
+  {
+    component: CNavItem,
+    name: 'Term base',
+    to: '/tern-base',
+    icon: <CIcon icon={cilPuzzle} customClassName="nav-icon" />,
+  },
   // {
   //   component: CNavItem,
   //   name: 'Typography',

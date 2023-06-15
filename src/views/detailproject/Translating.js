@@ -22,14 +22,16 @@ import EditIcon from '@mui/icons-material/Edit';
 import axiosInstance from '../../axios'
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
-import { Alert, Box, Button, CircularProgress, FormControl, FormControlLabel, FormLabel, InputLabel, Menu, MenuItem, Modal, Pagination, Radio, RadioGroup, Select, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField, Tooltip, Typography } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, FormControl, FormControlLabel, FormLabel, InputLabel, ListItemIcon, ListItemText, Menu, MenuItem, MenuList, Modal, Pagination, Radio, RadioGroup, Select, SpeedDial, SpeedDialAction, SpeedDialIcon, Stack, TextField, Tooltip, Typography } from '@mui/material';
 import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
 import MachineTranslating from './MachineTranslating'
 import GTranslateIcon from '@mui/icons-material/GTranslate';
+import CachedIcon from '@mui/icons-material/Cached';
 
 import ContentEditable from 'react-contenteditable'
 import { CTable, CTableBody, CTableDataCell, CTableHead, CTableHeaderCell, CTableRow } from '@coreui/react'
+import { ContentCopy, ContentCut, ContentPaste } from '@mui/icons-material'
 
 const actions = [
   { icon: <FileCopyIcon />, name: 'Copy' },
@@ -68,8 +70,10 @@ const Translating = () => {
   const [fetchNew, setFetchNew] = useState(false)
   const [fetchTempNew, setFetchTempNew] = useState(false)
   const [isOpenModalMachine, setIsOpenModalMachine] = useState(false)
+  const [isOpenModalCreateTermBase, setIsOpenModalCreateTermBase] = useState(false)
   const [optionMachine, setOptionMachine] = useState(null)
   const [statisticFile, setStatisticFile] = useState([])
+  const [termBaseValue, setTermBaseValue] = useState({ src: ' ', target: ' ' })
 
   const [filters, setFilters] = useState({
     limit: 6,
@@ -81,7 +85,9 @@ const Translating = () => {
   const [totalResults, setTotalResults] = useState(0)
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const [createTermBase, setCreateTermBase] = useState(null);
   const open = Boolean(anchorEl);
+  const openCreateTermBase = Boolean(createTermBase);
 
   const itemsRef = useRef([]);
 
@@ -198,11 +204,29 @@ const Translating = () => {
     setAnchorEl(null);
   };
 
+  const handleDetectLanguage = async (text) => {
+    const data = await axiosInstance.post('/project/detect-language',
+      {
+        text
+      }
+    )
+    return data
+  };
 
+  const handleOpenModalCreateTermBase = async () => {
+    setIsOpenModalCreateTermBase(true)
+    const data = await handleDetectLanguage(termBaseValue.src)
+    const language = data.data.data
+    if (project.sourceLanguage == language) {
+      setTermBaseValue(state => { return { ...state, target: '' } })
+    }
+    if (project.targetLanguage == language) {
+      setTermBaseValue(state => { return { ...state, src: '' } })
+    }
+  }
 
   const fetchFuzzyMatching = async () => {
     try {
-      console.log('here')
       const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
       const data = await axiosInstance.post('/translate/fuzzy-matching', { sentence: dataSentence, projectId: project.id })
       console.log('fuzzy', data)
@@ -214,6 +238,21 @@ const Translating = () => {
     }
   }
 
+  const handleCreateNewTermBase = async () => {
+    try {
+      dispatch({ type: 'set-backdrop' })
+      const data = await axiosInstance.post(`project/create-term-base`,
+        {
+          projectId: project?.id,
+          src: termBaseValue.src,
+          target: termBaseValue.target,
+        })
+      setIsOpenModalCreateTermBase(false)
+      dispatch({ type: 'set-backdrop' })
+    } catch (error) {
+      dispatch({ type: 'set-backdrop' })
+    }
+  }
 
   useEffect(() => {
     const fetchSentences = async () => {
@@ -237,7 +276,6 @@ const Translating = () => {
         setProject(data.data.project)
         setTotalPages(data.data.data.totalPages)
         setTotalResults(data.data.data.totalResults)
-
         if (data.data.data.results.findIndex(item => item.index == rowChoose) == -1 && data.data.data.results.length > 0) {
           setRowChoose(data.data.data.results[0].index)
         }
@@ -274,6 +312,32 @@ const Translating = () => {
   useEffect(() => {
     itemsRef.current = itemsRef.current.slice(0, sentences.length);
   }, [sentences]);
+
+  useEffect(() => {
+    function getSelectedText() {
+      let txt;
+      if (window.getSelection) {
+        txt = window.getSelection();
+      } else if (window.document.getSelection) {
+        txt = window.document.getSelection();
+      } else if (window.document.selection) {
+        txt = window.document.selection.createRange().text;
+      }
+      return txt;
+    }
+    const handleEventMouseup = (e) => {
+      const txt = getSelectedText().toString()
+      if (txt.trim().length > 0) {
+        setCreateTermBase(e.target)
+        setTermBaseValue({ src: txt.trim(), target: txt.trim() })
+        // alert(txt + e)
+      }
+    }
+    document.addEventListener('mouseup', handleEventMouseup)
+    return () => {
+      document.removeEventListener('mouseup', handleEventMouseup)
+    }
+  }, [])
 
   const handleChangeTarget = (e) => {
     const index = sentences.findIndex((item) => item.index == rowChoose)
@@ -358,6 +422,32 @@ const Translating = () => {
 
   return (
     <>
+      <Menu
+        id="demo-positioned-menu-2"
+        aria-labelledby="demo-positioned-button-2"
+        anchorEl={createTermBase}
+        open={openCreateTermBase}
+        onClose={() => setCreateTermBase(null)}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <MenuItem>
+        </MenuItem>
+        <MenuItem>
+          <ListItemIcon>
+            <ContentPaste fontSize="small" />
+          </ListItemIcon>
+          <ListItemText onClick={handleOpenModalCreateTermBase}>Add To Term Base</ListItemText>
+        </MenuItem>
+
+      </Menu>
+
       <Menu
         id="demo-positioned-menu"
         aria-labelledby="demo-positioned-button"
@@ -650,6 +740,39 @@ const Translating = () => {
           ))}
         </SpeedDial>
       </Box>
+
+      <Modal // Model add Term Base
+        open={isOpenModalCreateTermBase}
+        onClose={() => setIsOpenModalCreateTermBase(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Paper sx={style}>
+          <Typography variant="h6" className="mb-4">
+            Create New Term Base
+          </Typography>
+          <Alert severity="info">We using Machine of GoogleTranslate </Alert>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 5 }}>
+            <FormControl sx={{ m: 1, minWidth: 120 }}>
+              <TextField id="outlined-basic" label={project?.sourceLanguage} variant="outlined" value={termBaseValue.src} onChange={e => setTermBaseValue({ ...termBaseValue, src: e.target.value })} />
+            </FormControl>
+            <div><CachedIcon color={'secondary'} /></div>
+            <FormControl sx={{ m: 1, minWidth: 120 }}>
+              {/* <InputLabel htmlFor="grouped-select-2">Target</InputLabel> */}
+              <TextField id="outlined-basic" label={project?.targetLanguage} variant="outlined" value={termBaseValue.target} onChange={e => setTermBaseValue({ ...termBaseValue, target: e.target.value })} />
+            </FormControl>
+          </Box>
+
+          <Stack direction="row" justifyContent="end">
+            <Button variant="outlined" onClick={() => { setIsOpenModalCreateTermBase(false); setCreateTermBase(null) }}>
+              Cancel
+            </Button>
+            <Button variant="contained" className="ms-2" onClick={handleCreateNewTermBase}>
+              Create
+            </Button>
+          </Stack>
+        </Paper>
+      </Modal>
 
       <Modal // Model setting machine translate
         open={isOpenModalMachine}
