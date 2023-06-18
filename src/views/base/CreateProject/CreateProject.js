@@ -186,8 +186,8 @@ function CreateProject({ setActiveStep, setNewProject }) {
         <Typography variant="h6">
           <Brightness7Icon sx={{ mr: 1, fontSize: 28 }} />Set up Information Of Project
         </Typography>
-        <TextField id="input-with-sx" label="Name Of Project (required)" variant="outlined" defaultValue={' '} value={projectName} onChange={(e) => setProjectName(e.target.value)} />
-        <TextField id="input-with-sx" label="Description" variant="outlined" defaultValue={' '} value={description} onChange={(e) => setDescription(e.target.value)} />
+        <TextField style={{ width: '100%' }} id="input-with-sx" label="Name Of Project (required)" variant="outlined" defaultValue={' '} value={projectName} onChange={(e) => setProjectName(e.target.value)} />
+        <TextField style={{ width: '100%' }} id="input-with-sx" label="Description" variant="outlined" defaultValue={' '} value={description} onChange={(e) => setDescription(e.target.value)} />
         <FormControlLabel
           value={scope ? 'PUBLIC' : 'INDIVIDUAL'}
           onChange={() => { setScope(!scope) }}

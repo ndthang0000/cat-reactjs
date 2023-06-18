@@ -4,7 +4,7 @@ import axiosInstance from '../../axios'
 
 
 
-function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, setFetchNew, handleApplyCopyTarget, handleApplyTranslateTarget }) {
+function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, setFetchNew, handleApplyCopyTarget, handleApplyTranslateTarget, dictionarySuggest }) {
   const [machineSuggest, setMachineSuggest] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -62,6 +62,12 @@ function MachineTranslating({ rowChoose, sentences, target, projectId, fileId, s
   useEffect(() => {
     fetchMachineTranslate()
   }, [rowChoose])
+
+  useEffect(() => {
+    for (const i in dictionarySuggest) {
+      machineSuggest.replaceAll(i.source, i.target)
+    }
+  }, [dictionarySuggest.length])
 
   return (
     <Paper variant='outline' elevation={2} >

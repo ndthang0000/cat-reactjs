@@ -189,8 +189,8 @@ const Dashboard = () => {
                   </Link>
                 </div>
               </div>
-              <div className='mt-3' style={{ justifyContent: 'space-between', display: 'flex' }}>
 
+              <div className='mt-3 class-inline' style={{ justifyContent: 'space-between', display: 'flex' }}>
                 <ButtonGroup
                   disableElevation
                   variant="contained"
@@ -202,7 +202,7 @@ const Dashboard = () => {
                   )}
 
                 </ButtonGroup>
-                <div style={{ display: 'flex' }}>
+                <div style={{ display: 'flex' }} className='mt-2'>
                   <Paper
                     component="form"
                     elevation={2}

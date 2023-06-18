@@ -135,3 +135,26 @@ $cui-sidebar-width2:256px;
   align-items: center;
   justify-content: space-evenly;
 }
+
+
+@media only screen and (max-width:600px) {
+  .class-inline{
+    flex-direction: column;
+  }
+}
+
+.term-base-suggest-src{
+  background-color: rgba(77, 224, 79, 0.5);
+  border: 1px solid #2bd415;
+  padding: 4px 12px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.term-base-suggest-target{
+  background-color: rgba(233, 77, 50, 0.5);
+  border: 1px solid #db1d1d;
+  padding: 4px 12px;
+  border-radius: 3px;
+  text-align: center;
+}

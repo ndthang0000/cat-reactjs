@@ -215,6 +215,7 @@ const Translating = () => {
 
   const handleOpenModalCreateTermBase = async () => {
     setIsOpenModalCreateTermBase(true)
+    setCreateTermBase(null)
     const data = await handleDetectLanguage(termBaseValue.src)
     const language = data.data.data
     if (project.sourceLanguage == language) {
@@ -228,10 +229,23 @@ const Translating = () => {
   const fetchFuzzyMatching = async () => {
     try {
       const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
-      const data = await axiosInstance.post('/translate/fuzzy-matching', { sentence: dataSentence, projectId: project.id })
+      const data = await axiosInstance.post('/translate/fuzzy-matching', { sentence: dataSentence, projectId: project.id, fileId })
       console.log('fuzzy', data)
       if (data.data.status) {
         setFuzzyMatching(data.data.data)
+        setDictionarySuggest(data.data.dataTB)
+      }
+    } catch (err) {
+
+    }
+  }
+
+  const fetchTermBase = async () => {
+    try {
+      const dataSentence = sentences.find(item => item.index == rowChoose).textSrc
+      const data = await axiosInstance.post('/translate/query-term-base', { sentence: dataSentence, projectId: project.id })
+      if (data.data.status) {
+        setDictionarySuggest(data.data.data)
       }
     } catch (err) {
 
@@ -343,7 +357,7 @@ const Translating = () => {
     const index = sentences.findIndex((item) => item.index == rowChoose)
     sentences[index].textTarget = e.target.value
     sentences[index].status = 'DRAFT'
-    setFetchTempNew(state => !state)
+    // setFetchTempNew(state => !state)
     //setSentences(state => state.map(item => { return { ...item } }))
   }
 
@@ -546,7 +560,7 @@ const Translating = () => {
                       onClick={handleChooseRow}
                     >
                       <TableCell align="center">{row.index}</TableCell>
-                      <TableCell component="th" scope="row" width='40%'>
+                      <TableCell component="th" scope="row" width='40%' className='text-term-base'>
                         {row.textSrc}
                       </TableCell>
                       <TableCell align="left" width='40%' sx={{ padding: 0 }}>
@@ -657,6 +671,7 @@ const Translating = () => {
           <Grid2 lg={12} xs={4} sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}>
             <Typography variant='h6' color='black'>Machine Translate:</Typography>
             <MachineTranslating
+              dictionarySuggest={dictionarySuggest}
               rowChoose={rowChoose}
               sentences={sentences}
               target={project?.targetLanguage}
@@ -672,11 +687,20 @@ const Translating = () => {
             xs={4}
             sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8 }}
           >
-            <Typography variant="h6" color="black">
-              Dictionary:
+            <Typography variant="h6" color="black" sx={{ mb: 1 }}>
+              Term Base
             </Typography>
             <Paper variant="outline" elevation={2}>
-              Dictionary
+              {dictionarySuggest.length == 0
+                ? '- Nothing' :
+                <div>
+                  {dictionarySuggest.map((item, index) =>
+                    <div>
+                      <span className='term-base-suggest-src'>{item.source}</span>  - <span className='term-base-suggest-target'>{item.target}</span>
+                    </div>
+                  )}
+                </div>
+              }
             </Paper>
           </Grid2>
           <Grid2
