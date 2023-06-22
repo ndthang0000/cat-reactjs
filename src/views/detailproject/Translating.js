@@ -232,7 +232,7 @@ const Translating = () => {
       const data = await axiosInstance.post('/translate/fuzzy-matching', { sentence: dataSentence, projectId: project.id, fileId })
       console.log('fuzzy', data)
       if (data.data.status) {
-        setFuzzyMatching(data.data.data)
+        setFuzzyMatching(data.data.dataTM)
         setDictionarySuggest(data.data.dataTB)
       }
     } catch (err) {
@@ -727,9 +727,9 @@ const Translating = () => {
                   {fuzzyMatching.map((item, index) => (
                     <CTableRow v-for="item in tableItems" key={index}>
                       <CTableDataCell className="text-center">{index + 1}</CTableDataCell>
-                      <CTableDataCell>{project.isTmReverse ? item._source.target : item._source.source}</CTableDataCell>
-                      <CTableDataCell>{project.isTmReverse ? item._source.source : item._source.target}</CTableDataCell>
-                      <CTableDataCell>{item._score}</CTableDataCell>
+                      <CTableDataCell>{project.isTmReverse ? item.target : item.source}</CTableDataCell>
+                      <CTableDataCell>{project.isTmReverse ? item.source : item.target}</CTableDataCell>
+                      <CTableDataCell>{Math.round(item.similarity * 100)}%</CTableDataCell>
                     </CTableRow>
                   ))}
                 </CTableBody>

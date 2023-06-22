@@ -174,7 +174,7 @@ const Member = ({ project, setFetchNew }) => {
                 <CTableDataCell>{item.role}</CTableDataCell>
                 <CTableDataCell>{moment(item.timeJoin).format('LLL')}</CTableDataCell>
                 {hasRole() ? <CTableDataCell className="text-center">
-                  <CIcon icon={cilTrash} className={item.role === 'OWNER' ? "d-none" : "cursor-pointer"} onClick={() => handleRemoveMember(item._id)} />
+                  <CIcon icon={cilTrash} className={item.role === 'PROJECT MANAGER' ? "d-none" : "cursor-pointer"} onClick={() => handleRemoveMember(item._id)} />
                 </CTableDataCell> : <></>}
               </CTableRow>
             ))}
