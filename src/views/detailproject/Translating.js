@@ -30,7 +30,7 @@ import GTranslateIcon from '@mui/icons-material/GTranslate';
 import CachedIcon from '@mui/icons-material/Cached';
 
 import ContentEditable from 'react-contenteditable'
-import { CTable, CTableBody, CTableDataCell, CTableHead, CTableHeaderCell, CTableRow } from '@coreui/react'
+import { CAccordion, CAccordionBody, CAccordionHeader, CAccordionItem, CTable, CTableBody, CTableDataCell, CTableHead, CTableHeaderCell, CTableRow } from '@coreui/react'
 import { ContentCopy, ContentCut, ContentPaste } from '@mui/icons-material'
 
 const actions = [
@@ -67,6 +67,7 @@ const Translating = () => {
   const [rowChoose, setRowChoose] = useState(0);
   const [dictionarySuggest, setDictionarySuggest] = useState([])
   const [fuzzyMatching, setFuzzyMatching] = useState([])
+  const [dictionary, setDictionary] = useState([])
   const [fetchNew, setFetchNew] = useState(false)
   const [fetchTempNew, setFetchTempNew] = useState(false)
   const [isOpenModalMachine, setIsOpenModalMachine] = useState(false)
@@ -234,6 +235,13 @@ const Translating = () => {
       if (data.data.status) {
         setFuzzyMatching(data.data.dataTM)
         setDictionarySuggest(data.data.dataTB)
+      }
+
+      if (['en', 'vi'].includes(project.sourceLanguage) && ['en', 'vi'].includes(project.targetLanguage)) {
+        const data = await axiosInstance.post('/translate/dictionary', { sentence: dataSentence, projectId: project.id })
+        if (data.data.status) {
+          setDictionary(data.data.data)
+        }
       }
     } catch (err) {
 
@@ -719,7 +727,8 @@ const Translating = () => {
                     <CTableHeaderCell className="text-center">#</CTableHeaderCell>
                     <CTableHeaderCell>Source</CTableHeaderCell>
                     <CTableHeaderCell>Target</CTableHeaderCell>
-                    <CTableHeaderCell>Score</CTableHeaderCell>{' '}
+                    <CTableHeaderCell>Score</CTableHeaderCell>
+                    <CTableHeaderCell>Action</CTableHeaderCell>
                   </CTableRow>
                 </CTableHead>
 
@@ -730,10 +739,43 @@ const Translating = () => {
                       <CTableDataCell>{project.isTmReverse ? item.target : item.source}</CTableDataCell>
                       <CTableDataCell>{project.isTmReverse ? item.source : item.target}</CTableDataCell>
                       <CTableDataCell>{Math.round(item.similarity * 100)}%</CTableDataCell>
+                      <CTableDataCell>
+                        <Button
+                          color="warning"
+                          variant='outlined'
+                          sx={{ marginTop: 2, display: 'block' }}
+                          onClick={() => handleApplyCopyTarget(project.isTmReverse ? item.source : item.target)}
+                        >
+                          Copy
+                        </Button>
+                      </CTableDataCell>
                     </CTableRow>
                   ))}
                 </CTableBody>
               </CTable>
+            </Paper>
+          </Grid2 >
+
+          <Grid2
+            lg={12}
+            xs={4}
+            sx={{ border: 1, borderColor: '#b8b6b6', borderRadius: 1, mb: 0.8, display: ['en', 'vi'].includes(project.sourceLanguage) && ['en', 'vi'].includes(project.targetLanguage) ? 'block' : 'none' }}
+          >
+            <Typography variant="h6" color="black">
+              Dictionary
+            </Typography>
+
+            <Paper variant="outline" elevation={2}>
+            <CAccordion flush>
+              {dictionary.map((item, index) => (
+                <CAccordionItem itemKey={index}>
+                  <CAccordionHeader className='dictionary-item'>{item.word}</CAccordionHeader>
+                  <CAccordionBody>{item.description.map((des, idx)=>(
+                    <li key={idx}>{des}</li>
+                  ))}</CAccordionBody>
+                </CAccordionItem>
+              ))}
+            </CAccordion>
             </Paper>
           </Grid2 >
         </Grid2 >
@@ -817,8 +859,8 @@ const Translating = () => {
               value={optionMachine}
               onChange={(e) => setOptionMachine(e.target.value)}
             >
-              <FormControlLabel value="1" control={<Radio />} label="Apply for sentence un_translate and Confirm All" />
-              <FormControlLabel value="2" control={<Radio />} label="Apply for sentence un_translate and set Translating" />
+              <FormControlLabel value="1" control={<Radio />} label="Apply for sentence un_translate and set Translating" />
+              <FormControlLabel value="2" control={<Radio />} label="Apply for sentence un_translate and Confirm All" />
             </RadioGroup>
           </FormControl>
 

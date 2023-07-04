@@ -229,7 +229,7 @@ function CreateProject({ setActiveStep, setNewProject }) {
           </FormControl>
         </Box>
 
-        <Typography sx={{ mb: 1 }}>
+        {/* <Typography sx={{ mb: 1 }}>
           Choose Dictionary:
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -241,7 +241,7 @@ function CreateProject({ setActiveStep, setNewProject }) {
               <Button variant="text" onClick={handleAddDict}>Create</Button>
             </Select>
           </FormControl>
-        </Box>
+        </Box> */}
 
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} size='medium' onClick={handleCreateNewProject}>
